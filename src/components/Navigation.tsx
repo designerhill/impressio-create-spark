@@ -6,10 +6,10 @@ export const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const navigationItems = [
-    { name: "Features", href: "#features" },
-    { name: "Templates", href: "#gallery" },
-    { name: "Pricing", href: "#pricing" },
-    { name: "About", href: "#about" }
+    { name: "Certificates", href: "/certificate-creator" },
+    { name: "Cards", href: "/card-designer" },
+    { name: "Optimize", href: "/image-optimizer" },
+    { name: "Templates", href: "/templates" }
   ];
 
   return (
