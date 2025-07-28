@@ -1,15 +1,16 @@
 import { Button } from "@/components/ui/button";
 import { Sparkles, Menu, X } from "lucide-react";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 export const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const navigationItems = [
-    { name: "Certificates", href: "/certificate-creator" },
-    { name: "Cards", href: "/card-designer" },
-    { name: "Optimize", href: "/image-optimizer" },
-    { name: "Templates", href: "/templates" }
+    { name: "Features", href: "/features" },
+    { name: "Templates", href: "/templates" },
+    { name: "Pricing", href: "/pricing" },
+    { name: "About", href: "/about" }
   ];
 
   return (
@@ -17,30 +18,30 @@ export const Navigation = () => {
       <div className="max-w-7xl mx-auto px-6">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <div className="flex items-center gap-2">
+          <Link to="/" className="flex items-center gap-2">
             <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
               <Sparkles className="w-5 h-5 text-white" />
             </div>
-            <span className="text-xl font-bold text-foreground">Impressio</span>
-          </div>
+            <span className="text-xl font-black text-foreground">Impressio</span>
+          </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
             {navigationItems.map((item) => (
-              <a
+              <Link
                 key={item.name}
-                href={item.href}
-                className="text-foreground hover:text-primary transition-colors font-medium"
+                to={item.href}
+                className="text-foreground hover:text-primary transition-colors font-semibold"
               >
                 {item.name}
-              </a>
+              </Link>
             ))}
           </div>
 
           {/* Desktop CTA */}
           <div className="hidden md:flex items-center gap-4">
-            <Button variant="ghost">Sign In</Button>
-            <Button variant="default">Get Started</Button>
+            <Button variant="ghost" className="font-semibold">Sign In</Button>
+            <Button variant="default" className="font-bold">Get Started</Button>
           </div>
 
           {/* Mobile Menu Button */}
@@ -61,18 +62,18 @@ export const Navigation = () => {
           <div className="md:hidden py-4 border-t border-border bg-white/95 backdrop-blur-lg">
             <div className="space-y-4">
               {navigationItems.map((item) => (
-                <a
+                <Link
                   key={item.name}
-                  href={item.href}
-                  className="block text-foreground hover:text-primary transition-colors font-medium px-4 py-2"
+                  to={item.href}
+                  className="block text-foreground hover:text-primary transition-colors font-semibold px-4 py-2"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   {item.name}
-                </a>
+                </Link>
               ))}
               <div className="flex flex-col gap-3 px-4 pt-4 border-t border-border">
-                <Button variant="ghost" className="w-full">Sign In</Button>
-                <Button variant="default" className="w-full">Get Started</Button>
+                <Button variant="ghost" className="w-full font-semibold">Sign In</Button>
+                <Button variant="default" className="w-full font-bold">Get Started</Button>
               </div>
             </div>
           </div>

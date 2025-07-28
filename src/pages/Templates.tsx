@@ -45,7 +45,7 @@ const Templates = () => {
       title: "Work Anniversary",
       category: "cards",
       type: "Professional",
-      preview: "bg-gradient-gold",
+      preview: "bg-accent-gold",
       icon: Briefcase,
       popular: true
     },
@@ -81,7 +81,7 @@ const Templates = () => {
       title: "Team Celebration",
       category: "cards",
       type: "Corporate",
-      preview: "bg-gradient-gold",
+      preview: "bg-accent-gold",
       icon: Users,
       popular: false
     }
@@ -95,7 +95,7 @@ const Templates = () => {
 
   const filteredTemplates = templates.filter(template => {
     const matchesSearch = template.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         template.type.toLowerCase().includes(searchQuery.toLowerCase());
+      template.type.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = selectedCategory === "all" || template.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
@@ -103,15 +103,15 @@ const Templates = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
-      
+
       {/* Header */}
-      <section className="pt-24 pb-12 bg-gradient-subtle">
+      <section className="pt-24 pb-12 bg-gradient-hero">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-foreground mb-4">
+            <h1 className="text-5xl md:text-7xl font-black text-white mb-6 drop-shadow-lg">
               Design Templates
             </h1>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-xl md:text-2xl text-white font-semibold max-w-3xl mx-auto mb-8 drop-shadow-md">
               Choose from our collection of professionally designed templates for certificates and cards
             </p>
           </div>
@@ -124,7 +124,7 @@ const Templates = () => {
                 placeholder="Search templates..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
+                className="pl-10 font-medium"
               />
             </div>
           </div>
@@ -134,12 +134,12 @@ const Templates = () => {
       {/* Main Content */}
       <section className="py-16">
         <div className="max-w-7xl mx-auto px-6">
-          
+
           {/* Category Tabs */}
           <Tabs value={selectedCategory} onValueChange={setSelectedCategory} className="mb-12">
             <TabsList className="grid w-full grid-cols-3 max-w-md mx-auto">
               {categories.map((category) => (
-                <TabsTrigger key={category.id} value={category.id} className="text-sm">
+                <TabsTrigger key={category.id} value={category.id} className="text-sm font-semibold">
                   {category.name}
                   <Badge variant="secondary" className="ml-2">
                     {category.count}
@@ -152,45 +152,45 @@ const Templates = () => {
               {/* Templates Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {filteredTemplates.map((template) => (
-                  <Card key={template.id} className="group hover:shadow-elegant transition-all duration-300 overflow-hidden">
-                    
+                  <Card key={template.id} className="group hover:shadow-primary transition-all duration-300 overflow-hidden">
+
                     {/* Template Preview */}
                     <div className={`h-48 ${template.preview} relative flex items-center justify-center text-white overflow-hidden`}>
                       <div className="absolute inset-0 bg-black/20" />
                       <div className="relative text-center">
                         <template.icon className="w-8 h-8 mx-auto mb-2" />
-                        <h3 className="font-semibold">{template.title}</h3>
+                        <h3 className="font-bold">{template.title}</h3>
                       </div>
-                      
+
                       {/* Popular Badge */}
                       {template.popular && (
-                        <Badge className="absolute top-3 right-3 bg-accent text-accent-foreground">
+                        <Badge className="absolute top-3 right-3 bg-accent text-accent-foreground font-semibold">
                           Popular
                         </Badge>
                       )}
-                      
+
                       {/* Hover Overlay */}
                       <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                         <div className="space-y-2">
-                          <Button size="sm" variant="secondary">
+                          <Button size="sm" variant="secondary" className="font-semibold">
                             Preview
                           </Button>
-                          <Button size="sm" className="w-full">
+                          <Button size="sm" className="w-full font-bold">
                             Use Template
                           </Button>
                         </div>
                       </div>
                     </div>
-                    
+
                     {/* Template Info */}
                     <div className="p-4">
                       <div className="flex justify-between items-start mb-2">
-                        <h4 className="font-semibold text-sm">{template.title}</h4>
-                        <Badge variant="outline" className="text-xs">
+                        <h4 className="font-bold text-sm">{template.title}</h4>
+                        <Badge variant="outline" className="text-xs font-semibold">
                           {template.type}
                         </Badge>
                       </div>
-                      <p className="text-xs text-muted-foreground capitalize">
+                      <p className="text-xs text-muted-foreground capitalize font-medium">
                         {template.category}
                       </p>
                     </div>
@@ -204,8 +204,8 @@ const Templates = () => {
                   <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
                     <Search className="w-8 h-8 text-muted-foreground" />
                   </div>
-                  <h3 className="text-lg font-semibold mb-2">No templates found</h3>
-                  <p className="text-muted-foreground">
+                  <h3 className="text-lg font-bold mb-2">No templates found</h3>
+                  <p className="text-muted-foreground font-medium">
                     Try adjusting your search or browse different categories
                   </p>
                 </div>
@@ -216,20 +216,20 @@ const Templates = () => {
       </section>
 
       {/* Call to Action */}
-      <section className="py-16 bg-gradient-subtle">
+      <section className="py-16 bg-primary-soft">
         <div className="max-w-4xl mx-auto px-6 text-center">
-          <h2 className="text-3xl font-bold text-foreground mb-4">
+          <h2 className="text-4xl md:text-5xl font-black text-foreground mb-6">
             Can't find what you need?
           </h2>
-          <p className="text-xl text-muted-foreground mb-8">
+          <p className="text-xl text-muted-foreground mb-8 font-medium">
             Create custom designs from scratch with our powerful design tools
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" variant="outline">
+            <Button size="lg" variant="outline" className="font-semibold">
               <Award className="w-5 h-5 mr-2" />
               Create Certificate
             </Button>
-            <Button size="lg" variant="default">
+            <Button size="lg" variant="default" className="font-bold">
               <Gift className="w-5 h-5 mr-2" />
               Design Card
             </Button>

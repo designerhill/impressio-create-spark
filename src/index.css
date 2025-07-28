@@ -136,5 +136,39 @@ All colors MUST be HSL for perfect gradient rendering.
 
   body {
     @apply bg-background text-foreground;
+    /* Improved font rendering for better visibility */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    font-feature-settings: "kern" 1;
+  }
+
+  /* Ensure better font visibility for all text elements */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-weight: 900;
+    letter-spacing: -0.025em;
+  }
+
+  p,
+  span,
+  div,
+  a,
+  button {
+    font-weight: 500;
+  }
+
+  /* Improve contrast for better readability */
+  .text-muted-foreground {
+    font-weight: 600;
+  }
+
+  /* Ensure buttons have proper font weight */
+  button {
+    font-weight: 600;
   }
 }

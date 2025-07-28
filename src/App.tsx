@@ -10,6 +10,7 @@ import ImageOptimizer from "./pages/ImageOptimizer";
 import Templates from "./pages/Templates";
 import MyDesigns from "./pages/MyDesigns";
 import Pricing from "./pages/Pricing";
+import Features from "./pages/Features";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
@@ -30,6 +31,7 @@ const App = () => (
           <Route path="/templates" element={<Templates />} />
           <Route path="/my-designs" element={<MyDesigns />} />
           <Route path="/pricing" element={<Pricing />} />
+          <Route path="/features" element={<Features />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
