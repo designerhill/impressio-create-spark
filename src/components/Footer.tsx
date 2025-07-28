@@ -7,26 +7,19 @@ export const Footer = () => {
     Product: [
       { name: "Features", href: "/features" },
       { name: "Templates", href: "/templates" },
-      { name: "Pricing", href: "/pricing" },
-      { name: "API", href: "#api" }
+      { name: "Pricing", href: "/pricing" }
+
     ],
     Company: [
       { name: "About", href: "/about" },
       { name: "Blog", href: "#blog" },
-      { name: "Careers", href: "#careers" },
       { name: "Contact", href: "/contact" }
     ],
-    Resources: [
-      { name: "Help Center", href: "#help" },
-      { name: "Community", href: "#community" },
-      { name: "Tutorials", href: "#tutorials" },
-      { name: "Examples", href: "#examples" }
-    ],
     Legal: [
-      { name: "Privacy", href: "#privacy" },
-      { name: "Terms", href: "#terms" },
-      { name: "Security", href: "#security" },
-      { name: "Cookies", href: "#cookies" }
+      { name: "Privacy", href: "/privacy" },
+      { name: "Terms", href: "/terms" },
+      { name: "Security", href: "/security" },
+      { name: "Cookies", href: "/cookies" }
     ]
   };
 
@@ -41,7 +34,7 @@ export const Footer = () => {
     <footer className="bg-foreground text-white">
       {/* Main Footer */}
       <div className="max-w-7xl mx-auto px-6 py-16">
-        <div className="grid md:grid-cols-2 lg:grid-cols-6 gap-8">
+        <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-8">
           {/* Brand Section */}
           <div className="lg:col-span-2">
             <Link to="/" className="flex items-center gap-2 mb-4">
