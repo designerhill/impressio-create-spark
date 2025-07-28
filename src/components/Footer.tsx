@@ -1,19 +1,20 @@
 import { Sparkles, Twitter, Instagram, Linkedin, Github } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 export const Footer = () => {
   const footerLinks = {
     Product: [
-      { name: "Features", href: "#features" },
-      { name: "Templates", href: "#templates" },
-      { name: "Pricing", href: "#pricing" },
+      { name: "Features", href: "/features" },
+      { name: "Templates", href: "/templates" },
+      { name: "Pricing", href: "/pricing" },
       { name: "API", href: "#api" }
     ],
     Company: [
-      { name: "About", href: "#about" },
+      { name: "About", href: "/about" },
       { name: "Blog", href: "#blog" },
       { name: "Careers", href: "#careers" },
-      { name: "Contact", href: "#contact" }
+      { name: "Contact", href: "/contact" }
     ],
     Resources: [
       { name: "Help Center", href: "#help" },
@@ -43,14 +44,14 @@ export const Footer = () => {
         <div className="grid md:grid-cols-2 lg:grid-cols-6 gap-8">
           {/* Brand Section */}
           <div className="lg:col-span-2">
-            <div className="flex items-center gap-2 mb-4">
+            <Link to="/" className="flex items-center gap-2 mb-4">
               <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
                 <Sparkles className="w-5 h-5 text-white" />
               </div>
-              <span className="text-xl font-bold">Impressio</span>
-            </div>
-            <p className="text-white/70 mb-6 max-w-sm">
-              Create stunning digital assets with AI-powered design tools. 
+              <span className="text-xl font-black">Impressio</span>
+            </Link>
+            <p className="text-white/90 mb-6 max-w-sm font-medium">
+              Create stunning digital assets with AI-powered design tools.
               Transform your ideas into beautiful certificates, cards, and more.
             </p>
             <div className="flex gap-4">
@@ -73,16 +74,25 @@ export const Footer = () => {
           {/* Links Sections */}
           {Object.entries(footerLinks).map(([category, links]) => (
             <div key={category}>
-              <h3 className="font-semibold mb-4">{category}</h3>
+              <h3 className="font-bold mb-4 text-lg">{category}</h3>
               <ul className="space-y-3">
                 {links.map((link) => (
                   <li key={link.name}>
-                    <a
-                      href={link.href}
-                      className="text-white/70 hover:text-white transition-colors"
-                    >
-                      {link.name}
-                    </a>
+                    {link.href.startsWith('/') ? (
+                      <Link
+                        to={link.href}
+                        className="text-white/80 hover:text-white transition-colors font-medium"
+                      >
+                        {link.name}
+                      </Link>
+                    ) : (
+                      <a
+                        href={link.href}
+                        className="text-white/80 hover:text-white transition-colors font-medium"
+                      >
+                        {link.name}
+                      </a>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -94,16 +104,16 @@ export const Footer = () => {
         <div className="border-t border-white/20 mt-12 pt-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div>
-              <h3 className="font-semibold mb-2">Stay Updated</h3>
-              <p className="text-white/70">Get the latest templates and design tips</p>
+              <h3 className="font-bold mb-2 text-lg">Stay Updated</h3>
+              <p className="text-white/80 font-medium">Get the latest templates and design tips</p>
             </div>
             <div className="flex gap-3">
               <input
                 type="email"
                 placeholder="Enter your email"
-                className="px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-primary"
+                className="px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-primary font-medium"
               />
-              <Button variant="default">Subscribe</Button>
+              <Button variant="default" className="font-bold">Subscribe</Button>
             </div>
           </div>
         </div>
@@ -113,10 +123,10 @@ export const Footer = () => {
       <div className="border-t border-white/20">
         <div className="max-w-7xl mx-auto px-6 py-6">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <p className="text-white/70 text-sm">
+            <p className="text-white/80 text-base font-medium">
               © 2024 Impressio. All rights reserved.
             </p>
-            <p className="text-white/50 text-sm">
+            <p className="text-white/70 text-base font-medium">
               Design. Delight. Deliver.
             </p>
           </div>

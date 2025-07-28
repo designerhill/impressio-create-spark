@@ -6,7 +6,7 @@ export const Hero = () => {
   return (
     <section className="relative min-h-screen bg-gradient-hero flex items-center justify-center overflow-hidden">
       {/* Background Image with Overlay */}
-      <div 
+      <div
         className="absolute inset-0 opacity-20"
         style={{
           backgroundImage: `url(${heroImage})`,
@@ -14,7 +14,7 @@ export const Hero = () => {
           backgroundPosition: 'center',
         }}
       />
-      
+
       {/* Floating Elements */}
       <div className="absolute inset-0">
         <div className="absolute top-20 left-20 animate-[float_6s_ease-in-out_infinite]">
@@ -31,10 +31,10 @@ export const Hero = () => {
       <div className="relative z-10 text-center max-w-4xl mx-auto px-6">
         {/* Main Heading */}
         <div className="mb-8 animate-fade-in">
-          <h1 className="text-6xl md:text-8xl font-bold text-white mb-4 leading-tight">
+          <h1 className="text-6xl md:text-8xl font-black text-white mb-4 leading-tight drop-shadow-lg">
             Impressio
           </h1>
-          <div className="flex items-center justify-center gap-2 text-xl md:text-2xl text-white/90 font-medium">
+          <div className="flex items-center justify-center gap-2 text-xl md:text-2xl text-white font-bold">
             <Sparkles className="w-6 h-6 text-accent-gold" />
             <span>Design. Delight. Deliver.</span>
             <Sparkles className="w-6 h-6 text-accent-gold" />
@@ -42,18 +42,18 @@ export const Hero = () => {
         </div>
 
         {/* Subtitle */}
-        <p className="text-xl md:text-2xl text-white/80 mb-12 max-w-2xl mx-auto leading-relaxed animate-slide-up">
-          Create stunning certificates, cards, and announcements with AI-powered design tools. 
+        <p className="text-xl md:text-2xl text-white font-semibold mb-12 max-w-2xl mx-auto leading-relaxed animate-slide-up drop-shadow-md">
+          Create stunning certificates, cards, and announcements with AI-powered design tools.
           Transform your ideas into beautiful digital assets in minutes.
         </p>
 
         {/* CTA Buttons */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center animate-scale-in">
-          <Button variant="hero" size="xl" className="group">
+          <Button variant="hero" size="xl" className="group font-bold">
             <Wand2 className="w-5 h-5 group-hover:rotate-12 transition-transform" />
             Start Creating
           </Button>
-          <Button variant="outline" size="xl" className="backdrop-blur-sm bg-white/10 border-white/20 text-white hover:bg-white hover:text-foreground">
+          <Button variant="outline" size="xl" className="backdrop-blur-sm bg-white/10 border-white/20 text-white hover:bg-white hover:text-foreground font-semibold">
             <Download className="w-5 h-5" />
             View Examples
           </Button>
@@ -61,13 +61,13 @@ export const Hero = () => {
 
         {/* Trust Indicators */}
         <div className="mt-16 animate-fade-in animation-delay-500">
-          <p className="text-white/60 text-sm mb-4">Trusted by creative professionals worldwide</p>
-          <div className="flex items-center justify-center gap-8 opacity-60">
-            <div className="text-white/80 font-semibold">10K+ Assets Created</div>
-            <div className="w-px h-6 bg-white/30"></div>
-            <div className="text-white/80 font-semibold">99% Satisfaction</div>
-            <div className="w-px h-6 bg-white/30"></div>
-            <div className="text-white/80 font-semibold">5-Star Rated</div>
+          <p className="text-white font-semibold text-base mb-4 drop-shadow-md">Trusted by creative professionals worldwide</p>
+          <div className="flex items-center justify-center gap-8">
+            <div className="text-white font-bold text-lg">10K+ Assets Created</div>
+            <div className="w-px h-6 bg-white/50"></div>
+            <div className="text-white font-bold text-lg">99% Satisfaction</div>
+            <div className="w-px h-6 bg-white/50"></div>
+            <div className="text-white font-bold text-lg">5-Star Rated</div>
           </div>
         </div>
       </div>

@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Award, Calendar, Briefcase, ImageIcon, Zap, Palette } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const features = [
   {
@@ -13,7 +14,7 @@ const features = [
     icon: Calendar,
     title: "Birthday Cards",
     description: "Personalized birthday cards with stunning designs, custom messages, and festive elements.",
-    color: "bg-gradient-secondary", 
+    color: "bg-gradient-secondary",
     accent: "text-secondary"
   },
   {
@@ -52,10 +53,10 @@ export const Features = () => {
       <div className="max-w-7xl mx-auto px-6">
         {/* Section Header */}
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
+          <h2 className="text-4xl md:text-5xl font-black text-foreground mb-4">
             Everything You Need to Create
           </h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto font-medium">
             Powerful features designed to make your creative process effortless and enjoyable
           </p>
         </div>
@@ -75,15 +76,15 @@ export const Features = () => {
                 </div>
 
                 {/* Content */}
-                <h3 className={`text-xl font-semibold ${feature.accent} mb-3`}>
+                <h3 className={`text-xl font-bold ${feature.accent} mb-3`}>
                   {feature.title}
                 </h3>
-                <p className="text-muted-foreground leading-relaxed mb-6">
+                <p className="text-muted-foreground leading-relaxed mb-6 font-medium">
                   {feature.description}
                 </p>
 
                 {/* Learn More Link */}
-                <Button variant="ghost" size="sm" className="group-hover:translate-x-1 transition-transform">
+                <Button variant="ghost" size="sm" className="group-hover:translate-x-1 transition-transform font-semibold text-base">
                   Learn More →
                 </Button>
               </div>
@@ -93,9 +94,11 @@ export const Features = () => {
 
         {/* Bottom CTA */}
         <div className="text-center mt-16">
-          <Button variant="default" size="lg">
-            Explore All Features
-          </Button>
+          <Link to="/features">
+            <Button variant="default" size="lg" className="font-bold">
+              Explore All Features
+            </Button>
+          </Link>
         </div>
       </div>
     </section>

@@ -5,19 +5,19 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-semibold ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
-        default: "bg-gradient-primary text-primary-foreground shadow-primary hover:shadow-glow hover:scale-[1.02] transition-all duration-300",
-        destructive: "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90",
-        outline: "border border-border bg-background shadow-soft hover:bg-accent-aqua hover:text-accent-aqua-foreground hover:border-accent-aqua transition-all duration-300",
-        secondary: "bg-gradient-secondary text-secondary-foreground shadow-soft hover:shadow-primary hover:scale-[1.02] transition-all duration-300",
-        ghost: "hover:bg-primary-soft hover:text-primary transition-colors duration-200",
-        link: "text-primary underline-offset-4 hover:underline",
-        hero: "bg-gradient-hero text-white shadow-glow hover:shadow-primary hover:scale-[1.05] transition-all duration-300 font-semibold",
-        accent: "bg-gradient-accent text-white shadow-soft hover:shadow-glow hover:scale-[1.02] transition-all duration-300",
-        gold: "bg-accent-gold text-accent-gold-foreground shadow-soft hover:shadow-glow hover:scale-[1.02] transition-all duration-300"
+        default: "bg-gradient-primary text-primary-foreground shadow-primary hover:shadow-glow hover:scale-[1.02] transition-all duration-300 font-bold",
+        destructive: "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90 font-bold",
+        outline: "border border-border bg-background shadow-soft hover:bg-accent-aqua hover:text-accent-aqua-foreground hover:border-accent-aqua transition-all duration-300 font-semibold",
+        secondary: "bg-gradient-secondary text-secondary-foreground shadow-soft hover:shadow-primary hover:scale-[1.02] transition-all duration-300 font-bold",
+        ghost: "hover:bg-primary-soft hover:text-primary transition-colors duration-200 font-semibold",
+        link: "text-primary underline-offset-4 hover:underline font-semibold",
+        hero: "bg-gradient-hero text-white shadow-glow hover:shadow-primary hover:scale-[1.05] transition-all duration-300 font-black",
+        accent: "bg-gradient-accent text-white shadow-soft hover:shadow-glow hover:scale-[1.02] transition-all duration-300 font-bold",
+        gold: "bg-accent-gold text-accent-gold-foreground shadow-soft hover:shadow-glow hover:scale-[1.02] transition-all duration-300 font-bold"
       },
       size: {
         default: "h-9 px-4 py-2",
@@ -36,7 +36,7 @@ const buttonVariants = cva(
 
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
+  VariantProps<typeof buttonVariants> {
   asChild?: boolean
 }
 
