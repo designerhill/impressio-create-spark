@@ -1,10 +1,12 @@
 import { Button } from "@/components/ui/button";
-import { Sparkles, Menu, X } from "lucide-react";
+import { Sparkles, Menu, X, LogOut } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 
 export const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user, signOut } = useAuth();
 
   const navigationItems = [
     { name: "Features", href: "/features" },
@@ -40,8 +42,24 @@ export const Navigation = () => {
 
           {/* Desktop CTA */}
           <div className="hidden md:flex items-center gap-4">
-            <Button variant="ghost" className="font-semibold">Sign In</Button>
-            <Button variant="default" className="font-bold">Get Started</Button>
+            {user ? (
+              <>
+                <span className="text-sm text-muted-foreground">{user.email}</span>
+                <Button variant="ghost" onClick={signOut} className="font-semibold">
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Sign Out
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button variant="ghost" asChild className="font-semibold">
+                  <Link to="/auth">Sign In</Link>
+                </Button>
+                <Button variant="default" asChild className="font-bold">
+                  <Link to="/auth">Get Started</Link>
+                </Button>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -72,8 +90,24 @@ export const Navigation = () => {
                 </Link>
               ))}
               <div className="flex flex-col gap-3 px-4 pt-4 border-t border-border">
-                <Button variant="ghost" className="w-full font-semibold">Sign In</Button>
-                <Button variant="default" className="w-full font-bold">Get Started</Button>
+                {user ? (
+                  <>
+                    <span className="text-sm text-muted-foreground px-2">{user.email}</span>
+                    <Button variant="ghost" onClick={signOut} className="w-full font-semibold">
+                      <LogOut className="w-4 h-4 mr-2" />
+                      Sign Out
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button variant="ghost" asChild className="w-full font-semibold">
+                      <Link to="/auth">Sign In</Link>
+                    </Button>
+                    <Button variant="default" asChild className="w-full font-bold">
+                      <Link to="/auth">Get Started</Link>
+                    </Button>
+                  </>
+                )}
               </div>
             </div>
           </div>
