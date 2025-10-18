@@ -21,7 +21,7 @@ serve(async (req) => {
       apiVersion: '2023-10-16',
     });
 
-    const { planType, userId } = await req.json();
+    const { planType, userId, billingPeriod = 'monthly' } = await req.json();
 
     // Define price mapping
     const priceMap: Record<string, { amount: number; name: string }> = {
@@ -31,6 +31,14 @@ serve(async (req) => {
 
     if (!priceMap[planType]) {
       throw new Error('Invalid plan type');
+    }
+
+    // Calculate price based on billing period (20% discount for yearly)
+    let finalAmount = priceMap[planType].amount;
+    const interval = billingPeriod === 'yearly' ? 'year' : 'month';
+    
+    if (billingPeriod === 'yearly') {
+      finalAmount = Math.round(priceMap[planType].amount * 12 * 0.8);
     }
 
     const origin = req.headers.get('origin') || 'http://localhost:8080';
@@ -59,11 +67,11 @@ serve(async (req) => {
             currency: 'usd',
             product_data: {
               name: priceMap[planType].name,
-              description: `${planType.charAt(0).toUpperCase() + planType.slice(1)} subscription plan`,
+              description: `${planType.charAt(0).toUpperCase() + planType.slice(1)} subscription - ${billingPeriod} billing`,
             },
-            unit_amount: priceMap[planType].amount,
+            unit_amount: finalAmount,
             recurring: {
-              interval: 'month',
+              interval: interval as 'month' | 'year',
             },
           },
           quantity: 1,

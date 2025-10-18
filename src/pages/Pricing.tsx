@@ -9,11 +9,13 @@ import { useSubscription } from "@/hooks/useSubscription";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 
 const Pricing = () => {
   const { user } = useAuth();
   const { planType, loading } = useSubscription();
   const navigate = useNavigate();
+  const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'yearly'>('monthly');
 
   const handleSubscribe = async (plan: string) => {
     if (!user) {
@@ -35,7 +37,11 @@ const Pricing = () => {
       toast.loading('Creating checkout session...');
       
       const { data, error } = await supabase.functions.invoke('create-checkout-session', {
-        body: { planType: plan, userId: user.id },
+        body: { 
+          planType: plan, 
+          userId: user.id,
+          billingPeriod 
+        },
       });
 
       if (error) throw error;
@@ -47,6 +53,15 @@ const Pricing = () => {
       console.error('Error:', error);
       toast.error('Failed to create checkout session');
     }
+  };
+
+  const calculatePrice = (basePrice: string) => {
+    const price = parseInt(basePrice);
+    if (billingPeriod === 'yearly') {
+      // 20% discount for yearly
+      return Math.round(price * 12 * 0.8);
+    }
+    return price;
   };
 
   const plans = [
@@ -162,10 +177,24 @@ const Pricing = () => {
           
           {/* Toggle */}
           <div className="inline-flex items-center bg-muted rounded-lg p-1">
-            <button className="px-4 py-2 rounded-md bg-background text-foreground font-medium">
+            <button 
+              onClick={() => setBillingPeriod('monthly')}
+              className={`px-4 py-2 rounded-md font-medium transition-all ${
+                billingPeriod === 'monthly' 
+                  ? 'bg-background text-foreground shadow-sm' 
+                  : 'text-muted-foreground'
+              }`}
+            >
               Monthly
             </button>
-            <button className="px-4 py-2 rounded-md text-muted-foreground font-medium">
+            <button 
+              onClick={() => setBillingPeriod('yearly')}
+              className={`px-4 py-2 rounded-md font-medium transition-all ${
+                billingPeriod === 'yearly' 
+                  ? 'bg-background text-foreground shadow-sm' 
+                  : 'text-muted-foreground'
+              }`}
+            >
               Yearly
               <Badge className="ml-2 bg-green-100 text-green-700 text-xs">Save 20%</Badge>
             </button>
@@ -205,8 +234,12 @@ const Pricing = () => {
                   <p className="text-muted-foreground mb-4">{plan.description}</p>
                   
                   <div className="flex items-baseline justify-center">
-                    <span className="text-4xl font-bold text-foreground">${plan.price}</span>
-                    <span className="text-muted-foreground ml-1">/{plan.period}</span>
+                    <span className="text-4xl font-bold text-foreground">
+                      ${plan.name === 'Free' ? plan.price : calculatePrice(plan.price)}
+                    </span>
+                    <span className="text-muted-foreground ml-1">
+                      /{billingPeriod === 'yearly' && plan.name !== 'Free' ? 'year' : plan.period}
+                    </span>
                   </div>
                 </div>
 
