@@ -4,8 +4,51 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Check, X, Star, Zap, Crown, Sparkles } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { useSubscription } from "@/hooks/useSubscription";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 const Pricing = () => {
+  const { user } = useAuth();
+  const { planType, loading } = useSubscription();
+  const navigate = useNavigate();
+
+  const handleSubscribe = async (plan: string) => {
+    if (!user) {
+      navigate('/auth');
+      return;
+    }
+
+    if (plan === 'free') {
+      toast.info('You are already on the free plan');
+      return;
+    }
+
+    if (plan === 'enterprise') {
+      toast.info('Please contact sales for enterprise plans');
+      return;
+    }
+
+    try {
+      toast.loading('Creating checkout session...');
+      
+      const { data, error } = await supabase.functions.invoke('create-checkout-session', {
+        body: { planType: plan, userId: user.id },
+      });
+
+      if (error) throw error;
+
+      if (data?.url) {
+        window.location.href = data.url;
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error('Failed to create checkout session');
+    }
+  };
+
   const plans = [
     {
       name: "Free",
@@ -189,8 +232,12 @@ const Pricing = () => {
                   variant={plan.buttonVariant} 
                   className="w-full"
                   size="lg"
+                  onClick={() => handleSubscribe(plan.name.toLowerCase())}
+                  disabled={loading || (user && planType === plan.name.toLowerCase())}
                 >
-                  {plan.buttonText}
+                  {user && planType === plan.name.toLowerCase() 
+                    ? 'Current Plan' 
+                    : plan.buttonText}
                 </Button>
               </Card>
             ))}
