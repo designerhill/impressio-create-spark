@@ -9,13 +9,28 @@ import { useSubscription } from "@/hooks/useSubscription";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 
 const Pricing = () => {
   const { user } = useAuth();
-  const { planType, loading } = useSubscription();
+  const { planType, loading, subscription } = useSubscription();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'yearly'>('monthly');
+
+  useEffect(() => {
+    if (searchParams.get('success') === 'true') {
+      toast.success('Subscription activated! Welcome aboard 🎉');
+      searchParams.delete('success');
+      searchParams.delete('session_id');
+      setSearchParams(searchParams, { replace: true });
+    } else if (searchParams.get('canceled') === 'true') {
+      toast.info('Checkout canceled');
+      searchParams.delete('canceled');
+      setSearchParams(searchParams, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
 
   const handleSubscribe = async (plan: string) => {
     if (!user) {
@@ -33,25 +48,32 @@ const Pricing = () => {
       return;
     }
 
+    const toastId = toast.loading('Creating checkout session...');
     try {
-      toast.loading('Creating checkout session...');
-      
       const { data, error } = await supabase.functions.invoke('create-checkout-session', {
-        body: { 
-          planType: plan, 
-          userId: user.id,
-          billingPeriod 
-        },
+        body: { planType: plan, billingPeriod },
       });
-
       if (error) throw error;
-
-      if (data?.url) {
-        window.location.href = data.url;
-      }
+      toast.dismiss(toastId);
+      if (data?.url) window.location.href = data.url;
     } catch (error) {
       console.error('Error:', error);
+      toast.dismiss(toastId);
       toast.error('Failed to create checkout session');
+    }
+  };
+
+  const handleManageSubscription = async () => {
+    const toastId = toast.loading('Opening billing portal...');
+    try {
+      const { data, error } = await supabase.functions.invoke('customer-portal');
+      if (error) throw error;
+      toast.dismiss(toastId);
+      if (data?.url) window.location.href = data.url;
+    } catch (error) {
+      console.error(error);
+      toast.dismiss(toastId);
+      toast.error('Failed to open billing portal');
     }
   };
 
@@ -261,17 +283,28 @@ const Pricing = () => {
                 </div>
 
                 {/* CTA Button */}
-                <Button 
-                  variant={plan.buttonVariant} 
-                  className="w-full"
-                  size="lg"
-                  onClick={() => handleSubscribe(plan.name.toLowerCase())}
-                  disabled={loading || (user && planType === plan.name.toLowerCase())}
-                >
-                  {user && planType === plan.name.toLowerCase() 
-                    ? 'Current Plan' 
-                    : plan.buttonText}
-                </Button>
+                {user && planType === plan.name.toLowerCase() && plan.name !== 'Free' ? (
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    size="lg"
+                    onClick={handleManageSubscription}
+                  >
+                    Manage Subscription
+                  </Button>
+                ) : (
+                  <Button
+                    variant={plan.buttonVariant}
+                    className="w-full"
+                    size="lg"
+                    onClick={() => handleSubscribe(plan.name.toLowerCase())}
+                    disabled={loading || (!!user && planType === plan.name.toLowerCase())}
+                  >
+                    {user && planType === plan.name.toLowerCase()
+                      ? 'Current Plan'
+                      : plan.buttonText}
+                  </Button>
+                )}
               </Card>
             ))}
           </div>

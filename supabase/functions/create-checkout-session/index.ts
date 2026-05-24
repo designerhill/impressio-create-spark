@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import Stripe from 'https://esm.sh/stripe@14.21.0';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -21,7 +22,35 @@ serve(async (req) => {
       apiVersion: '2023-10-16',
     });
 
-    const { planType, userId, billingPeriod = 'monthly' } = await req.json();
+    // Verify auth
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: 'Missing authorization' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 401,
+      });
+    }
+
+    const userClient = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_ANON_KEY')!,
+      { global: { headers: { Authorization: authHeader } } }
+    );
+
+    const { data: { user }, error: userError } = await userClient.auth.getUser();
+    if (userError || !user?.email) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 401,
+      });
+    }
+
+    const adminClient = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    );
+
+    const { planType, billingPeriod = 'monthly' } = await req.json();
 
     // Define price mapping
     const priceMap: Record<string, { amount: number; name: string }> = {
@@ -42,25 +71,32 @@ serve(async (req) => {
     }
 
     const origin = req.headers.get('origin') || 'http://localhost:8080';
-    
-    // Create or retrieve customer
-    const customers = await stripe.customers.list({
-      limit: 1,
-      email: userId, // In production, use actual email
-    });
 
-    let customer;
-    if (customers.data.length > 0) {
-      customer = customers.data[0];
-    } else {
-      customer = await stripe.customers.create({
-        metadata: { supabase_user_id: userId },
-      });
+    // Look up existing customer from subscriptions table first
+    const { data: existingSub } = await adminClient
+      .from('subscriptions')
+      .select('stripe_customer_id')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    let customerId: string | undefined = existingSub?.stripe_customer_id ?? undefined;
+
+    if (!customerId) {
+      const customers = await stripe.customers.list({ email: user.email, limit: 1 });
+      if (customers.data.length > 0) {
+        customerId = customers.data[0].id;
+      } else {
+        const customer = await stripe.customers.create({
+          email: user.email,
+          metadata: { supabase_user_id: user.id },
+        });
+        customerId = customer.id;
+      }
     }
 
     // Create checkout session
     const session = await stripe.checkout.sessions.create({
-      customer: customer.id,
+      customer: customerId,
       line_items: [
         {
           price_data: {
@@ -78,11 +114,12 @@ serve(async (req) => {
         },
       ],
       mode: 'subscription',
-      success_url: `${origin}/pricing?success=true`,
+      success_url: `${origin}/pricing?success=true&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/pricing?canceled=true`,
       metadata: {
-        supabase_user_id: userId,
+        supabase_user_id: user.id,
         plan_type: planType,
+        billing_period: billingPeriod,
       },
     });
 
