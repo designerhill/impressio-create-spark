@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -11,6 +12,12 @@ import { Search, Filter, Award, Gift, Star, Heart, Briefcase, GraduationCap, Tro
 const Templates = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const navigate = useNavigate();
+
+  const useTemplate = (category: string, title: string) => {
+    const route = category === "certificates" ? "/certificate-creator" : "/card-designer";
+    navigate(`${route}?template=${encodeURIComponent(title)}`);
+  };
 
   const templates = [
     {
@@ -172,10 +179,11 @@ const Templates = () => {
                       {/* Hover Overlay */}
                       <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                         <div className="space-y-2">
-                          <Button size="sm" variant="secondary" className="font-semibold">
-                            Preview
-                          </Button>
-                          <Button size="sm" className="w-full font-bold">
+                          <Button
+                            size="sm"
+                            className="w-full font-bold"
+                            onClick={() => useTemplate(template.category, template.title)}
+                          >
                             Use Template
                           </Button>
                         </div>
@@ -225,14 +233,18 @@ const Templates = () => {
             Create custom designs from scratch with our powerful design tools
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" variant="outline" className="font-semibold">
-              <Award className="w-5 h-5 mr-2" />
-              Create Certificate
-            </Button>
-            <Button size="lg" variant="default" className="font-bold">
-              <Gift className="w-5 h-5 mr-2" />
-              Design Card
-            </Button>
+            <Link to="/certificate-creator">
+              <Button size="lg" variant="outline" className="font-semibold">
+                <Award className="w-5 h-5 mr-2" />
+                Create Certificate
+              </Button>
+            </Link>
+            <Link to="/card-designer">
+              <Button size="lg" variant="default" className="font-bold">
+                <Gift className="w-5 h-5 mr-2" />
+                Design Card
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
