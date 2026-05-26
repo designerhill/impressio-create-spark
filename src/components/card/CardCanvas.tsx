@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Canvas as FabricCanvas, Textbox, Rect, FabricImage } from "fabric";
+import { useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,6 +17,8 @@ export const CardCanvas = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [searchParams] = useSearchParams();
+  const templateId = searchParams.get("templateId");
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -26,12 +29,42 @@ export const CardCanvas = () => {
       backgroundColor: "#fef3c7",
     });
 
+    const applyTemplate = async () => {
+      if (!templateId) return;
+      const { data } = await supabase
+        .from("templates")
+        .select("title, template_data")
+        .eq("id", templateId)
+        .maybeSingle();
+      if (!data) return;
+      const td: any = data.template_data || {};
+      if (td.background) {
+        fabricCanvas.backgroundColor = td.background;
+      }
+      if (td.theme) setOccasion(td.theme);
+      fabricCanvas.add(
+        new Textbox(data.title, {
+          left: 300,
+          top: 80,
+          width: 500,
+          fontSize: 32,
+          fontFamily: "Georgia",
+          fill: "#1F2937",
+          textAlign: "center",
+          originX: "center",
+        })
+      );
+      fabricCanvas.renderAll();
+      toast.success(`Loaded template: ${data.title}`);
+    };
+
+    applyTemplate();
     setCanvas(fabricCanvas);
 
     return () => {
       fabricCanvas.dispose();
     };
-  }, []);
+  }, [templateId]);
 
   const handleGenerateMessage = async () => {
     if (!canvas) return;
