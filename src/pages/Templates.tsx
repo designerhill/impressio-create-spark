@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
@@ -7,105 +7,65 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, Filter, Award, Gift, Star, Heart, Briefcase, GraduationCap, Trophy, Users } from "lucide-react";
+import { Search, Award, Gift, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+
+interface Template {
+  id: string;
+  title: string;
+  type: string;
+  preview_url: string | null;
+  template_data: any;
+}
 
 const Templates = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const navigate = useNavigate();
+  const [templates, setTemplates] = useState<Template[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const useTemplate = (category: string, title: string) => {
-    const route = category === "certificates" ? "/certificate-creator" : "/card-designer";
-    navigate(`${route}?template=${encodeURIComponent(title)}`);
+  useEffect(() => {
+    const load = async () => {
+      const { data, error } = await supabase
+        .from("templates")
+        .select("id, title, type, preview_url, template_data")
+        .eq("is_public", true)
+        .order("created_at", { ascending: false });
+      if (error) {
+        toast.error("Failed to load templates");
+      } else {
+        setTemplates((data as Template[]) || []);
+      }
+      setLoading(false);
+    };
+    load();
+  }, []);
+
+  const useTemplate = (template: Template) => {
+    const route = template.type === "certificate" ? "/certificate-creator" : "/card-designer";
+    navigate(`${route}?templateId=${template.id}`);
   };
 
-  const templates = [
-    {
-      id: 1,
-      title: "Excellence Award",
-      category: "certificates",
-      type: "Professional",
-      preview: "bg-gradient-primary",
-      icon: Award,
-      popular: true
-    },
-    {
-      id: 2,
-      title: "Birthday Celebration",
-      category: "cards",
-      type: "Fun",
-      preview: "bg-gradient-accent",
-      icon: Gift,
-      popular: true
-    },
-    {
-      id: 3,
-      title: "Employee of the Month",
-      category: "certificates",
-      type: "Corporate",
-      preview: "bg-gradient-secondary",
-      icon: Star,
-      popular: false
-    },
-    {
-      id: 4,
-      title: "Work Anniversary",
-      category: "cards",
-      type: "Professional",
-      preview: "bg-accent-gold",
-      icon: Briefcase,
-      popular: true
-    },
-    {
-      id: 5,
-      title: "Graduation Certificate",
-      category: "certificates",
-      type: "Academic",
-      preview: "bg-gradient-primary",
-      icon: GraduationCap,
-      popular: false
-    },
-    {
-      id: 6,
-      title: "Thank You Card",
-      category: "cards",
-      type: "Personal",
-      preview: "bg-gradient-secondary",
-      icon: Heart,
-      popular: false
-    },
-    {
-      id: 7,
-      title: "Achievement Award",
-      category: "certificates",
-      type: "Sports",
-      preview: "bg-gradient-accent",
-      icon: Trophy,
-      popular: true
-    },
-    {
-      id: 8,
-      title: "Team Celebration",
-      category: "cards",
-      type: "Corporate",
-      preview: "bg-accent-gold",
-      icon: Users,
-      popular: false
-    }
-  ];
+  const filterMap: Record<string, string | null> = {
+    all: null,
+    certificates: "certificate",
+    cards: "card",
+  };
+
+  const filteredTemplates = templates.filter((t) => {
+    const matchesSearch = t.title.toLowerCase().includes(searchQuery.toLowerCase());
+    const wantedType = filterMap[selectedCategory];
+    const matchesCategory = !wantedType || t.type === wantedType;
+    return matchesSearch && matchesCategory;
+  });
 
   const categories = [
     { id: "all", name: "All Templates", count: templates.length },
-    { id: "certificates", name: "Certificates", count: templates.filter(t => t.category === "certificates").length },
-    { id: "cards", name: "Cards", count: templates.filter(t => t.category === "cards").length }
+    { id: "certificates", name: "Certificates", count: templates.filter((t) => t.type === "certificate").length },
+    { id: "cards", name: "Cards", count: templates.filter((t) => t.type === "card").length },
   ];
-
-  const filteredTemplates = templates.filter(template => {
-    const matchesSearch = template.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      template.type.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategory === "all" || template.category === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
 
   return (
     <div className="min-h-screen bg-background">
@@ -156,58 +116,59 @@ const Templates = () => {
             </TabsList>
 
             <TabsContent value={selectedCategory} className="mt-8">
-              {/* Templates Grid */}
+              {loading && (
+                <div className="flex justify-center py-16">
+                  <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+                </div>
+              )}
+
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {filteredTemplates.map((template) => (
                   <Card key={template.id} className="group hover:shadow-primary transition-all duration-300 overflow-hidden">
-
                     {/* Template Preview */}
-                    <div className={`h-48 ${template.preview} relative flex items-center justify-center text-white overflow-hidden`}>
+                    <div
+                      className="h-48 relative flex items-center justify-center text-white overflow-hidden bg-gradient-primary"
+                      style={
+                        template.preview_url
+                          ? { backgroundImage: `url(${template.preview_url})`, backgroundSize: "cover", backgroundPosition: "center" }
+                          : template.template_data?.background?.startsWith("linear-gradient")
+                          ? { background: template.template_data.background }
+                          : template.template_data?.background
+                          ? { backgroundColor: template.template_data.background }
+                          : undefined
+                      }
+                    >
                       <div className="absolute inset-0 bg-black/20" />
-                      <div className="relative text-center">
-                        <template.icon className="w-8 h-8 mx-auto mb-2" />
+                      <div className="relative text-center px-4">
+                        {template.type === "certificate" ? (
+                          <Award className="w-8 h-8 mx-auto mb-2" />
+                        ) : (
+                          <Gift className="w-8 h-8 mx-auto mb-2" />
+                        )}
                         <h3 className="font-bold">{template.title}</h3>
                       </div>
 
-                      {/* Popular Badge */}
-                      {template.popular && (
-                        <Badge className="absolute top-3 right-3 bg-accent text-accent-foreground font-semibold">
-                          Popular
-                        </Badge>
-                      )}
-
-                      {/* Hover Overlay */}
-                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                        <div className="space-y-2">
-                          <Button
-                            size="sm"
-                            className="w-full font-bold"
-                            onClick={() => useTemplate(template.category, template.title)}
-                          >
-                            Use Template
-                          </Button>
-                        </div>
+                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center p-4">
+                        <Button size="sm" className="font-bold" onClick={() => useTemplate(template)}>
+                          Use Template
+                        </Button>
                       </div>
                     </div>
 
-                    {/* Template Info */}
                     <div className="p-4">
                       <div className="flex justify-between items-start mb-2">
                         <h4 className="font-bold text-sm">{template.title}</h4>
-                        <Badge variant="outline" className="text-xs font-semibold">
+                        <Badge variant="outline" className="text-xs font-semibold capitalize">
                           {template.type}
                         </Badge>
                       </div>
-                      <p className="text-xs text-muted-foreground capitalize font-medium">
-                        {template.category}
-                      </p>
                     </div>
                   </Card>
                 ))}
               </div>
 
               {/* Empty State */}
-              {filteredTemplates.length === 0 && (
+              {!loading && filteredTemplates.length === 0 && (
                 <div className="text-center py-12">
                   <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
                     <Search className="w-8 h-8 text-muted-foreground" />

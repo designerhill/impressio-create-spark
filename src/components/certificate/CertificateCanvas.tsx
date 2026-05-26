@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Canvas as FabricCanvas, Textbox, Rect } from "fabric";
+import { useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,6 +15,8 @@ export const CertificateCanvas = () => {
   const [title, setTitle] = useState("Certificate of Achievement");
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [searchParams] = useSearchParams();
+  const templateId = searchParams.get("templateId");
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -24,38 +27,70 @@ export const CertificateCanvas = () => {
       backgroundColor: "#ffffff",
     });
 
-    // Add border
-    const border = new Rect({
-      left: 20,
-      top: 20,
-      width: 760,
-      height: 560,
-      fill: "transparent",
-      stroke: "#D4AF37",
-      strokeWidth: 8,
-      selectable: false,
-    });
-    fabricCanvas.add(border);
+    const applyTemplate = async () => {
+      let bgColor = "#ffffff";
+      let borderColor = "#D4AF37";
+      let templateTitle = "Certificate of Achievement";
 
-    // Add title
-    const titleText = new Textbox("Certificate of Achievement", {
-      left: 400,
-      top: 100,
-      width: 600,
-      fontSize: 48,
-      fontFamily: "Georgia",
-      fill: "#2C3E50",
-      textAlign: "center",
-      originX: "center",
-    });
-    fabricCanvas.add(titleText);
+      if (templateId) {
+        const { data } = await supabase
+          .from("templates")
+          .select("title, template_data")
+          .eq("id", templateId)
+          .maybeSingle();
+        if (data) {
+          templateTitle = data.title;
+          setTitle(data.title);
+          const td: any = data.template_data || {};
+          if (td.background && !String(td.background).startsWith("linear-gradient")) {
+            bgColor = td.background;
+          }
+          if (td.border === "gold") borderColor = "#D4AF37";
+          else if (td.border === "silver") borderColor = "#C0C0C0";
+          else if (td.border === "none") borderColor = "transparent";
+          toast.success(`Loaded template: ${data.title}`);
+        }
+      }
 
+      fabricCanvas.backgroundColor = bgColor;
+
+      if (borderColor !== "transparent") {
+        fabricCanvas.add(
+          new Rect({
+            left: 20,
+            top: 20,
+            width: 760,
+            height: 560,
+            fill: "transparent",
+            stroke: borderColor,
+            strokeWidth: 8,
+            selectable: false,
+          })
+        );
+      }
+
+      fabricCanvas.add(
+        new Textbox(templateTitle, {
+          left: 400,
+          top: 100,
+          width: 600,
+          fontSize: 48,
+          fontFamily: "Georgia",
+          fill: "#2C3E50",
+          textAlign: "center",
+          originX: "center",
+        })
+      );
+      fabricCanvas.renderAll();
+    };
+
+    applyTemplate();
     setCanvas(fabricCanvas);
 
     return () => {
       fabricCanvas.dispose();
     };
-  }, []);
+  }, [templateId]);
 
   const handleAddText = () => {
     if (!canvas) return;
