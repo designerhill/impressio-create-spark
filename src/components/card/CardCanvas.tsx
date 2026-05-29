@@ -1,13 +1,62 @@
-import { useEffect, useRef, useState } from "react";
-import { Canvas as FabricCanvas, Textbox, Rect, FabricImage } from "fabric";
+import { useEffect, useRef, useState, useCallback } from "react";
+import {
+  Canvas as FabricCanvas,
+  Textbox,
+  Rect,
+  Circle,
+  Triangle,
+  Line,
+  FabricImage,
+  Gradient,
+  Shadow,
+  FabricObject,
+  Group,
+} from "fabric";
 import { useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Sparkles, Download, Save, Type, Wand2 } from "lucide-react";
+import { Slider } from "@/components/ui/slider";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Separator } from "@/components/ui/separator";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Sparkles, Download, Save, Type, Wand2, Square, Circle as CircleIcon,
+  Triangle as TriangleIcon, Minus, Image as ImageIcon, Trash2, Copy,
+  Undo2, Redo2, AlignLeft, AlignCenter, AlignRight, Bold, Italic, Underline,
+  Layers, ChevronUp, ChevronDown, Lock, Unlock, Palette, FlipHorizontal,
+  FlipVertical, Star, Heart, Smile,
+} from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+
+const FONTS = [
+  "Arial", "Georgia", "Times New Roman", "Courier New", "Verdana",
+  "Trebuchet MS", "Impact", "Comic Sans MS", "Brush Script MT", "Palatino",
+];
+
+const PRESET_BACKGROUNDS = [
+  { name: "Cream", value: "#fef3c7" },
+  { name: "Blush", value: "#fce7f3" },
+  { name: "Mint", value: "#d1fae5" },
+  { name: "Sky", value: "#dbeafe" },
+  { name: "Lavender", value: "#ede9fe" },
+  { name: "Peach", value: "#fed7aa" },
+  { name: "White", value: "#ffffff" },
+  { name: "Charcoal", value: "#1f2937" },
+];
+
+const GRADIENT_PRESETS = [
+  { name: "Sunset", from: "#ff9a9e", to: "#fad0c4" },
+  { name: "Ocean", from: "#a1c4fd", to: "#c2e9fb" },
+  { name: "Peach", from: "#ffecd2", to: "#fcb69f" },
+  { name: "Lavender", from: "#e0c3fc", to: "#8ec5fc" },
+  { name: "Mint", from: "#84fab0", to: "#8fd3f4" },
+  { name: "Berry", from: "#f093fb", to: "#f5576c" },
+];
+
+const STICKERS = ["⭐", "❤️", "🎉", "🎂", "🎁", "✨", "🌸", "🎈", "🏆", "💐", "🥂", "🌟"];
 
 export const CardCanvas = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
