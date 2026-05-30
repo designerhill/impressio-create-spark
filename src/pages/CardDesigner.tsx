@@ -2,9 +2,19 @@ import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 import { CardCanvas } from "@/components/card/CardCanvas";
 import { useAuth } from "@/hooks/useAuth";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useEffect } from "react";
-import { Sparkles, Wand2, Palette, Layers, Loader2 } from "lucide-react";
+import {
+  Loader2,
+  ChevronRight,
+  LayoutGrid,
+  Sparkles,
+  Wand2,
+  Palette,
+  Layers,
+  Keyboard,
+  CircleDot,
+} from "lucide-react";
 
 export default function CardDesigner() {
   const { user, loading } = useAuth();
@@ -18,8 +28,8 @@ export default function CardDesigner() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      <div className="min-h-screen flex items-center justify-center bg-[hsl(210_20%_98%)]">
+        <Loader2 className="w-8 h-8 animate-spin text-[hsl(217_91%_60%)]" />
       </div>
     );
   }
@@ -29,67 +39,134 @@ export default function CardDesigner() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-background relative overflow-hidden">
-      {/* Ambient background decoration */}
-      <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute -top-32 -left-32 w-[480px] h-[480px] rounded-full bg-gradient-primary opacity-20 blur-3xl" />
-        <div className="absolute top-1/3 -right-40 w-[520px] h-[520px] rounded-full bg-gradient-accent opacity-20 blur-3xl" />
-        <div className="absolute bottom-0 left-1/3 w-[420px] h-[420px] rounded-full bg-gradient-secondary opacity-15 blur-3xl" />
-      </div>
-
+    <div className="min-h-screen flex flex-col bg-[hsl(210_20%_98%)] font-studio text-slate-900">
       <Navigation />
 
-      <main className="flex-1 pt-24 pb-16">
-        <div className="max-w-7xl mx-auto px-6">
-          {/* Hero header */}
-          <div className="mb-8 flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
-            <div className="space-y-3 max-w-2xl">
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary-soft text-primary text-xs font-bold uppercase tracking-wider border border-primary/20">
-                <Sparkles className="w-3.5 h-3.5" />
-                Creative Studio
+      <main className="flex-1 pt-20 pb-10">
+        <div className="max-w-[1400px] mx-auto px-6">
+          {/* Workspace header */}
+          <header className="mt-4 mb-6">
+            <nav className="flex items-center gap-1.5 text-xs font-medium text-slate-500 mb-4">
+              <Link to="/" className="hover:text-slate-900 transition-colors">Home</Link>
+              <ChevronRight className="w-3.5 h-3.5" />
+              <Link to="/templates" className="hover:text-slate-900 transition-colors">Studio</Link>
+              <ChevronRight className="w-3.5 h-3.5" />
+              <span className="text-slate-900">Card Designer</span>
+            </nav>
+
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-[hsl(217_91%_60%)] grid place-items-center shadow-[0_8px_24px_-12px_hsl(217_91%_60%/0.6)]">
+                  <LayoutGrid className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="font-display text-[28px] leading-tight font-semibold tracking-tight text-slate-900">
+                    Card Designer
+                  </h1>
+                  <p className="text-sm text-slate-500 mt-0.5">
+                    A professional canvas for greeting cards, invitations and gift tags.
+                  </p>
+                </div>
               </div>
-              <h1 className="text-5xl md:text-6xl font-black leading-[1.05] tracking-tight">
-                Card{" "}
-                <span className="bg-gradient-hero bg-clip-text text-transparent">
-                  Designer
+              <div className="flex items-center gap-2 text-xs text-slate-500">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white border border-slate-200">
+                  <CircleDot className="w-3 h-3 text-emerald-500" /> Autosave ready
                 </span>
-              </h1>
-              <p className="text-lg md:text-xl text-muted-foreground">
-                Design beautiful, share-ready greeting cards with AI assistance,
-                gradients, shapes, stickers, and a full property editor.
-              </p>
+              </div>
             </div>
+          </header>
 
-            {/* Feature chips */}
-            <div className="grid grid-cols-3 gap-3 lg:gap-4">
-              <div className="flex flex-col items-center justify-center gap-1.5 px-4 py-3 rounded-xl bg-white/70 backdrop-blur-lg border border-border shadow-soft min-w-[88px]">
-                <Wand2 className="w-5 h-5 text-accent-aqua" />
-                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">AI Assist</span>
+          {/* Dashboard shell */}
+          <div className="grid grid-cols-1 lg:grid-cols-[260px_minmax(0,1fr)] gap-5">
+            {/* Left rail */}
+            <aside className="hidden lg:flex flex-col gap-4">
+              <section className="rounded-2xl bg-white border border-slate-200 p-5">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400 mb-3">
+                  Project
+                </p>
+                <div className="space-y-2.5 text-sm">
+                  <div className="flex items-center justify-between">
+                    <span className="text-slate-500">Type</span>
+                    <span className="font-medium text-slate-900">Greeting Card</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-slate-500">Format</span>
+                    <span className="font-medium text-slate-900">600 × 800 px</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-slate-500">Color</span>
+                    <span className="font-medium text-slate-900">RGB</span>
+                  </div>
+                </div>
+              </section>
+
+              <section className="rounded-2xl bg-white border border-slate-200 p-5">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400 mb-3">
+                  Toolkit
+                </p>
+                <ul className="space-y-2.5 text-sm">
+                  <li className="flex items-center gap-2.5 text-slate-700">
+                    <Wand2 className="w-4 h-4 text-[hsl(217_91%_60%)]" />
+                    AI copy & images
+                  </li>
+                  <li className="flex items-center gap-2.5 text-slate-700">
+                    <Palette className="w-4 h-4 text-[hsl(217_91%_60%)]" />
+                    Solid & gradient fills
+                  </li>
+                  <li className="flex items-center gap-2.5 text-slate-700">
+                    <Layers className="w-4 h-4 text-[hsl(217_91%_60%)]" />
+                    Object layers & locking
+                  </li>
+                  <li className="flex items-center gap-2.5 text-slate-700">
+                    <Sparkles className="w-4 h-4 text-[hsl(217_91%_60%)]" />
+                    Shapes, text & stickers
+                  </li>
+                </ul>
+              </section>
+
+              <section className="rounded-2xl bg-slate-900 text-slate-100 p-5">
+                <div className="flex items-center gap-2 mb-3">
+                  <Keyboard className="w-4 h-4 text-slate-300" />
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+                    Shortcuts
+                  </p>
+                </div>
+                <ul className="space-y-2 text-xs">
+                  {[
+                    ["Undo", "⌘ Z"],
+                    ["Redo", "⌘ ⇧ Z"],
+                    ["Duplicate", "⌘ D"],
+                    ["Delete", "Del"],
+                  ].map(([k, v]) => (
+                    <li key={k} className="flex items-center justify-between">
+                      <span className="text-slate-400">{k}</span>
+                      <kbd className="font-mono px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 text-slate-200">
+                        {v}
+                      </kbd>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            </aside>
+
+            {/* Canvas surface */}
+            <section className="rounded-2xl bg-white border border-slate-200 shadow-[0_1px_2px_rgba(15,23,42,0.04),0_8px_28px_-12px_rgba(15,23,42,0.08)]">
+              <div className="flex items-center justify-between px-5 py-3 border-b border-slate-100">
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-rose-400/70" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-amber-400/70" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-400/70" />
+                  <span className="ml-3 text-xs font-medium text-slate-500">
+                    Untitled card · Draft
+                  </span>
+                </div>
+                <span className="text-xs text-slate-400">Workspace</span>
               </div>
-              <div className="flex flex-col items-center justify-center gap-1.5 px-4 py-3 rounded-xl bg-white/70 backdrop-blur-lg border border-border shadow-soft min-w-[88px]">
-                <Palette className="w-5 h-5 text-accent-gold" />
-                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Gradients</span>
+              <div className="p-4 md:p-6">
+                <CardCanvas />
               </div>
-              <div className="flex flex-col items-center justify-center gap-1.5 px-4 py-3 rounded-xl bg-white/70 backdrop-blur-lg border border-border shadow-soft min-w-[88px]">
-                <Layers className="w-5 h-5 text-primary" />
-                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Layers</span>
-              </div>
-            </div>
+            </section>
           </div>
-
-          {/* Studio frame */}
-          <div className="relative rounded-3xl p-[1.5px] bg-gradient-hero shadow-elegant">
-            <div className="rounded-[calc(1.5rem-1.5px)] bg-background/60 backdrop-blur-xl p-4 md:p-6">
-          <CardCanvas />
-            </div>
-          </div>
-
-          {/* Helper footer */}
-          <p className="text-center text-xs text-muted-foreground mt-6">
-            Tip: <kbd className="px-1.5 py-0.5 rounded bg-muted border border-border font-mono">⌘Z</kbd> undo ·{" "}
-            <kbd className="px-1.5 py-0.5 rounded bg-muted border border-border font-mono">⌘D</kbd> duplicate ·{" "}
-            <kbd className="px-1.5 py-0.5 rounded bg-muted border border-border font-mono">Del</kbd> remove
-          </p>
         </div>
       </main>
       <Footer />
