@@ -8,7 +8,6 @@ import {
   Loader2,
   ChevronRight,
   LayoutGrid,
-  Sparkles,
   CircleDot,
 } from "lucide-react";
 
