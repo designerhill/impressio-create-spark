@@ -8,10 +8,6 @@ import {
   Loader2,
   ChevronRight,
   LayoutGrid,
-  Sparkles,
-  Wand2,
-  Palette,
-  Layers,
   CircleDot,
 } from "lucide-react";
 
@@ -75,56 +71,7 @@ export default function CardDesigner() {
             </div>
           </header>
 
-          {/* Dashboard shell */}
-          <div className="grid grid-cols-1 lg:grid-cols-[260px_minmax(0,1fr)] gap-5">
-            {/* Left rail */}
-            <aside className="hidden lg:flex flex-col gap-4">
-              <section className="rounded-2xl bg-white border border-slate-200 p-5">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400 mb-3">
-                  Project
-                </p>
-                <div className="space-y-2.5 text-sm">
-                  <div className="flex items-center justify-between">
-                    <span className="text-slate-500">Type</span>
-                    <span className="font-medium text-slate-900">Greeting Card</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-slate-500">Format</span>
-                    <span className="font-medium text-slate-900">600 × 800 px</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-slate-500">Color</span>
-                    <span className="font-medium text-slate-900">RGB</span>
-                  </div>
-                </div>
-              </section>
-
-              <section className="rounded-2xl bg-white border border-slate-200 p-5">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400 mb-3">
-                  Toolkit
-                </p>
-                <ul className="space-y-2.5 text-sm">
-                  <li className="flex items-center gap-2.5 text-slate-700">
-                    <Wand2 className="w-4 h-4 text-[hsl(217_91%_60%)]" />
-                    AI copy & images
-                  </li>
-                  <li className="flex items-center gap-2.5 text-slate-700">
-                    <Palette className="w-4 h-4 text-[hsl(217_91%_60%)]" />
-                    Solid & gradient fills
-                  </li>
-                  <li className="flex items-center gap-2.5 text-slate-700">
-                    <Layers className="w-4 h-4 text-[hsl(217_91%_60%)]" />
-                    Object layers & locking
-                  </li>
-                  <li className="flex items-center gap-2.5 text-slate-700">
-                    <Sparkles className="w-4 h-4 text-[hsl(217_91%_60%)]" />
-                    Shapes, text & stickers
-                  </li>
-                </ul>
-              </section>
-
-            </aside>
-
+          <div>
             {/* Canvas surface */}
             <section className="rounded-2xl bg-white border border-slate-200 shadow-[0_1px_2px_rgba(15,23,42,0.04),0_8px_28px_-12px_rgba(15,23,42,0.08)]">
               <div className="flex items-center justify-between px-5 py-3 border-b border-slate-100">
