@@ -10,6 +10,7 @@ import CardDesigner from "./pages/CardDesigner";
 import ImageOptimizer from "./pages/ImageOptimizer";
 import Templates from "./pages/Templates";
 import MyDesigns from "./pages/MyDesigns";
+import Account from "./pages/Account";
 import Pricing from "./pages/Pricing";
 import Features from "./pages/Features";
 import About from "./pages/About";
@@ -36,6 +37,7 @@ const App = () => (
           <Route path="/image-optimizer" element={<ImageOptimizer />} />
           <Route path="/templates" element={<Templates />} />
           <Route path="/my-designs" element={<MyDesigns />} />
+          <Route path="/account" element={<Account />} />
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/features" element={<Features />} />
           <Route path="/about" element={<About />} />
