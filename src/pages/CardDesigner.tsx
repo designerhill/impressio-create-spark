@@ -124,29 +124,6 @@ export default function CardDesigner() {
                 </ul>
               </section>
 
-              <section className="rounded-2xl bg-slate-900 text-slate-100 p-5">
-                <div className="flex items-center gap-2 mb-3">
-                  <Keyboard className="w-4 h-4 text-slate-300" />
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400">
-                    Shortcuts
-                  </p>
-                </div>
-                <ul className="space-y-2 text-xs">
-                  {[
-                    ["Undo", "⌘ Z"],
-                    ["Redo", "⌘ ⇧ Z"],
-                    ["Duplicate", "⌘ D"],
-                    ["Delete", "Del"],
-                  ].map(([k, v]) => (
-                    <li key={k} className="flex items-center justify-between">
-                      <span className="text-slate-400">{k}</span>
-                      <kbd className="font-mono px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 text-slate-200">
-                        {v}
-                      </kbd>
-                    </li>
-                  ))}
-                </ul>
-              </section>
             </aside>
 
             {/* Canvas surface */}
