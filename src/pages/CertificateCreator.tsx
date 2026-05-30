@@ -6,13 +6,9 @@ import { useNavigate, Link } from "react-router-dom";
 import { useEffect } from "react";
 import {
   Award,
-  Sparkles,
-  ShieldCheck,
   Loader2,
   ChevronRight,
   Keyboard,
-  Printer,
-  Wand2,
   CircleDot,
 } from "lucide-react";
 
@@ -79,46 +75,6 @@ export default function CertificateCreator() {
           <div className="grid grid-cols-1 lg:grid-cols-[260px_minmax(0,1fr)] gap-5">
             {/* Left rail */}
             <aside className="hidden lg:flex flex-col gap-4">
-              <section className="rounded-2xl bg-white border border-slate-200 p-5">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400 mb-3">
-                  Document
-                </p>
-                <div className="space-y-2.5 text-sm">
-                  <div className="flex items-center justify-between">
-                    <span className="text-slate-500">Type</span>
-                    <span className="font-medium text-slate-900">Certificate</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-slate-500">Format</span>
-                    <span className="font-medium text-slate-900">A4 Landscape</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-slate-500">Export</span>
-                    <span className="font-medium text-slate-900">PNG · PDF</span>
-                  </div>
-                </div>
-              </section>
-
-              <section className="rounded-2xl bg-white border border-slate-200 p-5">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400 mb-3">
-                  Toolkit
-                </p>
-                <ul className="space-y-2.5 text-sm">
-                  <li className="flex items-center gap-2.5 text-slate-700">
-                    <Sparkles className="w-4 h-4 text-[hsl(217_91%_60%)]" /> Template gallery
-                  </li>
-                  <li className="flex items-center gap-2.5 text-slate-700">
-                    <Wand2 className="w-4 h-4 text-[hsl(217_91%_60%)]" /> AI-generated copy
-                  </li>
-                  <li className="flex items-center gap-2.5 text-slate-700">
-                    <ShieldCheck className="w-4 h-4 text-[hsl(217_91%_60%)]" /> Locked layers
-                  </li>
-                  <li className="flex items-center gap-2.5 text-slate-700">
-                    <Printer className="w-4 h-4 text-[hsl(217_91%_60%)]" /> 2× print export
-                  </li>
-                </ul>
-              </section>
-
               <section className="rounded-2xl bg-slate-900 text-slate-100 p-5">
                 <div className="flex items-center gap-2 mb-3">
                   <Keyboard className="w-4 h-4 text-slate-300" />
