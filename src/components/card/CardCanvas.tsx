@@ -540,6 +540,7 @@ export const CardCanvas = () => {
           <Input value={recipientName} onChange={(e) => setRecipientName(e.target.value)} placeholder="John Doe" className="mt-1" />
         </div>
         <div className="ml-auto flex flex-wrap gap-2">
+          <AutosaveBadge status={saveStatus} lastSavedAt={lastSavedAt} signedIn={!!user} />
           <Button size="sm" variant="outline" onClick={undo} disabled={historyIndex.current <= 0}><Undo2 className="w-4 h-4" /></Button>
           <Button size="sm" variant="outline" onClick={redo} disabled={historyIndex.current >= historyRef.current.length - 1}><Redo2 className="w-4 h-4" /></Button>
           <Button size="sm" onClick={handleSave} disabled={isSaving}><Save className="w-4 h-4 mr-2" />{isSaving ? "Saving..." : "Save"}</Button>
@@ -692,3 +693,48 @@ export const CardCanvas = () => {
     </div>
   );
 };
+
+function AutosaveBadge({
+  status,
+  lastSavedAt,
+  signedIn,
+}: {
+  status: "idle" | "saving" | "saved" | "error";
+  lastSavedAt: Date | null;
+  signedIn: boolean;
+}) {
+  if (!signedIn) {
+    return (
+      <span className="inline-flex items-center gap-1.5 text-xs text-slate-500 px-2.5 py-1 rounded-md bg-slate-100 border border-slate-200">
+        <CloudOff className="w-3.5 h-3.5" /> Sign in to autosave
+      </span>
+    );
+  }
+  if (status === "saving") {
+    return (
+      <span className="inline-flex items-center gap-1.5 text-xs text-slate-600 px-2.5 py-1 rounded-md bg-slate-100 border border-slate-200">
+        <Loader2 className="w-3.5 h-3.5 animate-spin" /> Saving…
+      </span>
+    );
+  }
+  if (status === "error") {
+    return (
+      <span className="inline-flex items-center gap-1.5 text-xs text-destructive px-2.5 py-1 rounded-md bg-destructive/10 border border-destructive/20">
+        <CloudOff className="w-3.5 h-3.5" /> Couldn't autosave
+      </span>
+    );
+  }
+  if (status === "saved" && lastSavedAt) {
+    const time = lastSavedAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    return (
+      <span className="inline-flex items-center gap-1.5 text-xs text-emerald-700 px-2.5 py-1 rounded-md bg-emerald-50 border border-emerald-200">
+        <CheckCircle2 className="w-3.5 h-3.5" /> Saved · {time}
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex items-center gap-1.5 text-xs text-slate-500 px-2.5 py-1 rounded-md bg-slate-100 border border-slate-200">
+      <Cloud className="w-3.5 h-3.5" /> Autosave on
+    </span>
+  );
+}
