@@ -8,7 +8,6 @@ import {
   Award,
   Loader2,
   ChevronRight,
-  Keyboard,
   CircleDot,
 } from "lucide-react";
 

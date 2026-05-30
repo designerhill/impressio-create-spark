@@ -12,7 +12,6 @@ import {
   Wand2,
   Palette,
   Layers,
-  Keyboard,
   CircleDot,
 } from "lucide-react";
 
