@@ -26,10 +26,11 @@ import {
   Triangle as TriangleIcon, Minus, Image as ImageIcon, Trash2, Copy,
   Undo2, Redo2, AlignLeft, AlignCenter, AlignRight, Bold, Italic, Underline,
   Layers, ChevronUp, ChevronDown, Lock, Unlock, Palette, FlipHorizontal,
-  FlipVertical, Star, Heart, Smile,
+  FlipVertical, Star, Heart, Smile, Cloud, CloudOff, Loader2, CheckCircle2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 const FONTS = [
   "Arial", "Georgia", "Times New Roman", "Courier New", "Verdana",
@@ -72,6 +73,15 @@ export const CardCanvas = () => {
   const [activeObject, setActiveObject] = useState<FabricObject | null>(null);
   const [, forceUpdate] = useState(0);
   const refresh = () => forceUpdate((n) => n + 1);
+  const { user } = useAuth();
+
+  // autosave
+  const designIdRef = useRef<string | null>(searchParams.get("designId"));
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
+  const autosaveTimerRef = useRef<number | null>(null);
+  const scheduleAutosaveRef = useRef<() => void>(() => {});
+  const hasInteractedRef = useRef(false);
 
   // history (undo/redo)
   const historyRef = useRef<string[]>([]);
@@ -88,6 +98,74 @@ export const CardCanvas = () => {
     refresh();
   }, []);
 
+  const performSave = useCallback(
+    async (silent: boolean) => {
+      if (!canvas || !user) return;
+      setSaveStatus("saving");
+      try {
+        const designData = canvas.toJSON();
+        const dataUrl = canvas.toDataURL({ format: "png", multiplier: 1 });
+        const title = `${occasion} Card${recipientName ? ` for ${recipientName}` : ""}`;
+        if (designIdRef.current) {
+          const { error } = await supabase
+            .from("designs")
+            .update({ design_data: designData, thumbnail_url: dataUrl, title })
+            .eq("id", designIdRef.current);
+          if (error) throw error;
+        } else {
+          const { data, error } = await supabase
+            .from("designs")
+            .insert({
+              user_id: user.id,
+              title,
+              type: "card",
+              design_data: designData,
+              thumbnail_url: dataUrl,
+            })
+            .select("id")
+            .single();
+          if (error) throw error;
+          designIdRef.current = data.id;
+        }
+        setSaveStatus("saved");
+        setLastSavedAt(new Date());
+        if (!silent) toast.success("Card saved!");
+      } catch (e: any) {
+        console.error("Autosave error:", e);
+        setSaveStatus("error");
+        if (!silent) toast.error(e?.message || "Failed to save");
+      }
+    },
+    [canvas, user, occasion, recipientName]
+  );
+
+  const scheduleAutosave = useCallback(() => {
+    if (!user || !canvas || isRestoring.current) return;
+    hasInteractedRef.current = true;
+    if (autosaveTimerRef.current) window.clearTimeout(autosaveTimerRef.current);
+    setSaveStatus("saving");
+    autosaveTimerRef.current = window.setTimeout(() => {
+      performSave(true);
+    }, 1500);
+  }, [user, canvas, performSave]);
+
+  useEffect(() => {
+    scheduleAutosaveRef.current = scheduleAutosave;
+  }, [scheduleAutosave]);
+
+  // Title changes (occasion/recipient) should trigger autosave too
+  useEffect(() => {
+    if (!hasInteractedRef.current) return;
+    scheduleAutosaveRef.current?.();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [occasion, recipientName]);
+
+  useEffect(() => {
+    return () => {
+      if (autosaveTimerRef.current) window.clearTimeout(autosaveTimerRef.current);
+    };
+  }, []);
+
   useEffect(() => {
     if (!canvasRef.current) return;
 
@@ -96,6 +174,23 @@ export const CardCanvas = () => {
       height: 400,
       backgroundColor: "#fef3c7",
     });
+
+    const loadExistingDesign = async () => {
+      const id = designIdRef.current;
+      if (!id) return false;
+      const { data } = await supabase
+        .from("designs")
+        .select("title, design_data, type")
+        .eq("id", id)
+        .maybeSingle();
+      if (!data || data.type !== "card") return false;
+      await fabricCanvas.loadFromJSON(data.design_data as any);
+      fabricCanvas.renderAll();
+      toast.success(`Loaded: ${data.title}`);
+      setLastSavedAt(new Date());
+      setSaveStatus("saved");
+      return true;
+    };
 
     const applyTemplate = async () => {
       if (!templateId) return;
@@ -130,7 +225,10 @@ export const CardCanvas = () => {
       setActiveObject(fabricCanvas.getActiveObject() || null);
     };
     const onCleared = () => setActiveObject(null);
-    const onModified = () => saveHistory(fabricCanvas);
+    const onModified = () => {
+      saveHistory(fabricCanvas);
+      scheduleAutosaveRef.current?.();
+    };
 
     fabricCanvas.on("selection:created", onSelection);
     fabricCanvas.on("selection:updated", onSelection);
@@ -139,7 +237,10 @@ export const CardCanvas = () => {
     fabricCanvas.on("object:added", onModified);
     fabricCanvas.on("object:removed", onModified);
 
-    applyTemplate().then(() => saveHistory(fabricCanvas));
+    loadExistingDesign().then((loaded) => {
+      if (!loaded) applyTemplate().then(() => saveHistory(fabricCanvas));
+      else saveHistory(fabricCanvas);
+    });
     setCanvas(fabricCanvas);
     // initial snapshot if no template
     setTimeout(() => {
@@ -386,35 +487,17 @@ export const CardCanvas = () => {
 
   const handleSave = async () => {
     if (!canvas) return;
-
-    setIsSaving(true);
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        toast.error("Please sign in to save");
-        return;
-      }
-
-      const dataUrl = canvas.toDataURL({ format: "png", multiplier: 1 });
-      const designData = canvas.toJSON();
-
-      const { error } = await supabase.from("designs").insert({
-        user_id: user.id,
-        title: `${occasion} Card${recipientName ? ` for ${recipientName}` : ''}`,
-        type: "card",
-        design_data: designData,
-        thumbnail_url: dataUrl,
-      });
-
-      if (error) throw error;
-
-      toast.success("Card saved!");
-    } catch (error: any) {
-      console.error("Save error:", error);
-      toast.error(error.message || "Failed to save");
-    } finally {
-      setIsSaving(false);
+    if (!user) {
+      toast.error("Please sign in to save");
+      return;
     }
+    if (autosaveTimerRef.current) {
+      window.clearTimeout(autosaveTimerRef.current);
+      autosaveTimerRef.current = null;
+    }
+    setIsSaving(true);
+    await performSave(false);
+    setIsSaving(false);
   };
 
   const handleExport = () => {
