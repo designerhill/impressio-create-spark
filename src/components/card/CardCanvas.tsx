@@ -202,21 +202,40 @@ export const CardCanvas = () => {
       if (!data) return;
       const td: any = data.template_data || {};
       if (td.background) {
-        fabricCanvas.backgroundColor = td.background;
+        if (String(td.background).startsWith("linear-gradient")) {
+          const m = td.background.match(/linear-gradient\([^,]+,\s*(#[0-9a-fA-F]{3,8})[^,]*,\s*(#[0-9a-fA-F]{3,8})/);
+          if (m) {
+            fabricCanvas.add(
+              new Rect({
+                left: 0, top: 0, width: 600, height: 400,
+                selectable: false,
+                fill: new Gradient({
+                  type: "linear",
+                  coords: { x1: 0, y1: 0, x2: 600, y2: 400 },
+                  colorStops: [
+                    { offset: 0, color: m[1] },
+                    { offset: 1, color: m[2] },
+                  ],
+                }),
+              })
+            );
+          }
+        } else {
+          fabricCanvas.backgroundColor = td.background;
+        }
       }
       if (td.theme) setOccasion(td.theme);
-      fabricCanvas.add(
-        new Textbox(data.title, {
-          left: 300,
-          top: 80,
-          width: 500,
-          fontSize: 32,
-          fontFamily: "Georgia",
-          fill: "#1F2937",
-          textAlign: "center",
-          originX: "center",
-        })
-      );
+      if (Array.isArray(td.objects) && td.objects.length) {
+        renderTemplateObjects(fabricCanvas, td.objects);
+      } else {
+        fabricCanvas.add(
+          new Textbox(data.title, {
+            left: 300, top: 80, width: 500, fontSize: 32,
+            fontFamily: "Georgia", fill: "#1F2937",
+            textAlign: "center", originX: "center",
+          })
+        );
+      }
       fabricCanvas.renderAll();
       toast.success(`Loaded template: ${data.title}`);
     };

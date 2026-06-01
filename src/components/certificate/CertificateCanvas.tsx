@@ -99,6 +99,8 @@ export const CertificateCanvas = () => {
       let bgColor = "#ffffff";
       let borderColor = "#D4AF37";
       let templateTitle = "Certificate of Achievement";
+      let customObjects: any[] | null = null;
+      let bgGradient: string | null = null;
 
       if (templateId) {
         const { data } = await supabase
@@ -110,17 +112,42 @@ export const CertificateCanvas = () => {
           templateTitle = data.title;
           setTitle(data.title);
           const td: any = data.template_data || {};
-          if (td.background && !String(td.background).startsWith("linear-gradient")) {
-            bgColor = td.background;
+          if (td.background) {
+            if (String(td.background).startsWith("linear-gradient")) {
+              bgGradient = td.background;
+            } else {
+              bgColor = td.background;
+            }
           }
           if (td.border === "gold") borderColor = "#D4AF37";
           else if (td.border === "silver") borderColor = "#C0C0C0";
           else if (td.border === "none") borderColor = "transparent";
+          if (Array.isArray(td.objects)) customObjects = td.objects;
           toast.success(`Loaded template: ${data.title}`);
         }
       }
 
       fabricCanvas.backgroundColor = bgColor;
+      if (bgGradient) {
+        // Approximate CSS linear-gradient by parsing the two stops.
+        const m = bgGradient.match(/linear-gradient\([^,]+,\s*(#[0-9a-fA-F]{3,8})[^,]*,\s*(#[0-9a-fA-F]{3,8})/);
+        if (m) {
+          fabricCanvas.add(
+            new Rect({
+              left: 0, top: 0, width: 800, height: 600,
+              selectable: false,
+              fill: new Gradient({
+                type: "linear",
+                coords: { x1: 0, y1: 0, x2: 800, y2: 600 },
+                colorStops: [
+                  { offset: 0, color: m[1] },
+                  { offset: 1, color: m[2] },
+                ],
+              }),
+            })
+          );
+        }
+      }
 
       if (borderColor !== "transparent") {
         fabricCanvas.add(
@@ -132,13 +159,17 @@ export const CertificateCanvas = () => {
         );
       }
 
-      fabricCanvas.add(
-        new Textbox(templateTitle, {
-          left: 400, top: 100, width: 600, fontSize: 48,
-          fontFamily: "Georgia", fill: "#2C3E50", textAlign: "center",
-          originX: "center",
-        })
-      );
+      if (customObjects && customObjects.length) {
+        renderTemplateObjects(fabricCanvas, customObjects);
+      } else {
+        fabricCanvas.add(
+          new Textbox(templateTitle, {
+            left: 400, top: 100, width: 600, fontSize: 48,
+            fontFamily: "Georgia", fill: "#2C3E50", textAlign: "center",
+            originX: "center",
+          })
+        );
+      }
       fabricCanvas.renderAll();
     };
 
