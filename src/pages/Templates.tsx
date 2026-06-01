@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Search, Award, Gift, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { TemplateThumbnail } from "@/components/templates/TemplateThumbnail";
 
 interface Template {
   id: string;
@@ -126,27 +127,21 @@ const Templates = () => {
                 {filteredTemplates.map((template) => (
                   <Card key={template.id} className="group hover:shadow-primary transition-all duration-300 overflow-hidden">
                     {/* Template Preview */}
-                    <div
-                      className="h-48 relative flex items-center justify-center text-white overflow-hidden bg-gradient-primary"
-                      style={
-                        template.preview_url
-                          ? { backgroundImage: `url(${template.preview_url})`, backgroundSize: "cover", backgroundPosition: "center" }
-                          : template.template_data?.background?.startsWith("linear-gradient")
-                          ? { background: template.template_data.background }
-                          : template.template_data?.background
-                          ? { backgroundColor: template.template_data.background }
-                          : undefined
-                      }
-                    >
-                      <div className="absolute inset-0 bg-black/20" />
-                      <div className="relative text-center px-4">
-                        {template.type === "certificate" ? (
-                          <Award className="w-8 h-8 mx-auto mb-2" />
-                        ) : (
-                          <Gift className="w-8 h-8 mx-auto mb-2" />
-                        )}
-                        <h3 className="font-bold">{template.title}</h3>
-                      </div>
+                    <div className="relative aspect-[4/3] overflow-hidden bg-muted">
+                      {template.preview_url ? (
+                        <img
+                          src={template.preview_url}
+                          alt={template.title}
+                          className="absolute inset-0 w-full h-full object-cover"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <TemplateThumbnail
+                          type={template.type}
+                          data={template.template_data}
+                          className="absolute inset-0 w-full h-full"
+                        />
+                      )}
 
                       <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center p-4">
                         <Button size="sm" className="font-bold" onClick={() => useTemplate(template)}>
@@ -157,8 +152,15 @@ const Templates = () => {
 
                     <div className="p-4">
                       <div className="flex justify-between items-start mb-2">
-                        <h4 className="font-bold text-sm">{template.title}</h4>
-                        <Badge variant="outline" className="text-xs font-semibold capitalize">
+                        <div className="flex items-center gap-2 min-w-0">
+                          {template.type === "certificate" ? (
+                            <Award className="w-4 h-4 shrink-0 text-primary" />
+                          ) : (
+                            <Gift className="w-4 h-4 shrink-0 text-primary" />
+                          )}
+                          <h4 className="font-bold text-sm truncate">{template.title}</h4>
+                        </div>
+                        <Badge variant="outline" className="text-xs font-semibold capitalize shrink-0">
                           {template.type}
                         </Badge>
                       </div>
