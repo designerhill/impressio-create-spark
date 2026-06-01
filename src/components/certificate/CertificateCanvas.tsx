@@ -28,6 +28,7 @@ import {
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import jsPDF from "jspdf";
+import { renderTemplateObjects } from "@/lib/templateRender";
 
 const FONTS = [
   "Arial", "Georgia", "Times New Roman", "Courier New", "Verdana",
