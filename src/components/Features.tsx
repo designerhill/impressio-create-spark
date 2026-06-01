@@ -84,8 +84,8 @@ export const Features = () => {
                 </p>
 
                 {/* Learn More Link */}
-                <Button variant="ghost" size="sm" className="group-hover:translate-x-1 transition-transform font-semibold text-base">
-                  Learn More →
+                <Button asChild variant="ghost" size="sm" className="group-hover:translate-x-1 transition-transform font-semibold text-base">
+                  <Link to="/features">Learn More →</Link>
                 </Button>
               </div>
             );

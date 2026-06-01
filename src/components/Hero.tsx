@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Sparkles, Wand2, Palette, Download } from "lucide-react";
+import { Link } from "react-router-dom";
 import heroImage from "@/assets/hero-image.jpg";
 
 export const Hero = () => {
@@ -49,13 +50,17 @@ export const Hero = () => {
 
         {/* CTA Buttons */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center animate-scale-in">
-          <Button variant="hero" size="xl" className="group font-bold">
-            <Wand2 className="w-5 h-5 group-hover:rotate-12 transition-transform" />
-            Start Creating
+          <Button asChild variant="hero" size="xl" className="group font-bold">
+            <Link to="/certificate-creator">
+              <Wand2 className="w-5 h-5 group-hover:rotate-12 transition-transform" />
+              Start Creating
+            </Link>
           </Button>
-          <Button variant="outline" size="xl" className="backdrop-blur-sm bg-white/10 border-white/20 text-white hover:bg-white hover:text-foreground font-semibold">
-            <Download className="w-5 h-5" />
-            View Examples
+          <Button asChild variant="outline" size="xl" className="backdrop-blur-sm bg-white/10 border-white/20 text-white hover:bg-white hover:text-foreground font-semibold">
+            <Link to="/templates">
+              <Download className="w-5 h-5" />
+              View Examples
+            </Link>
           </Button>
         </div>
 

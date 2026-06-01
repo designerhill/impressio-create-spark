@@ -82,21 +82,25 @@ export const Gallery = () => {
                 <h3 className="text-lg font-bold text-foreground mb-4">{item.title}</h3>
 
                 <div className="flex items-center justify-between">
-                  <Button variant="ghost" size="sm" className="font-semibold text-base">
-                    <Eye className="w-4 h-4" />
-                    Preview
+                  <Button asChild variant="ghost" size="sm" className="font-semibold text-base">
+                    <Link to="/templates">
+                      <Eye className="w-4 h-4" />
+                      Preview
+                    </Link>
                   </Button>
-                  <Button variant="outline" size="sm" className="font-semibold text-base">
-                    Use Template
+                  <Button asChild variant="outline" size="sm" className="font-semibold text-base">
+                    <Link to="/templates">Use Template</Link>
                   </Button>
                 </div>
               </div>
 
               {/* Hover Overlay */}
               <div className="absolute inset-0 bg-gradient-hero opacity-0 group-hover:opacity-90 transition-opacity duration-300 flex items-center justify-center">
-                <Button variant="hero" size="lg" className="transform scale-0 group-hover:scale-100 transition-transform duration-300 font-bold">
-                  Create Similar
-                  <ArrowRight className="w-4 h-4" />
+                <Button asChild variant="hero" size="lg" className="transform scale-0 group-hover:scale-100 transition-transform duration-300 font-bold">
+                  <Link to="/templates">
+                    Create Similar
+                    <ArrowRight className="w-4 h-4" />
+                  </Link>
                 </Button>
               </div>
             </div>
