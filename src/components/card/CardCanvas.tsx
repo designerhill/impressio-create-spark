@@ -26,9 +26,9 @@ import {
   Triangle as TriangleIcon, Minus, Image as ImageIcon, Trash2, Copy,
   Undo2, Redo2, AlignLeft, AlignCenter, AlignRight, Bold, Italic, Underline,
   Layers, ChevronUp, ChevronDown, Lock, Unlock, Palette, FlipHorizontal,
-  FlipVertical, Star, Heart, Smile, Cloud, CloudOff, Loader2, CheckCircle2,
-  Share2, Eye, ZoomIn, ZoomOut, Grid3x3, Upload as UploadIcon, Smile as SmileIcon,
-  Shapes, Plus, PanelLeftClose,
+  FlipVertical, Cloud, CloudOff, Loader2, CheckCircle2,
+  Share2, ZoomIn, ZoomOut, Grid3x3, Upload as UploadIcon, Smile as SmileIcon,
+  Shapes, PanelLeftClose,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
