@@ -27,11 +27,14 @@ import {
   Undo2, Redo2, AlignLeft, AlignCenter, AlignRight, Bold, Italic, Underline,
   Layers, ChevronUp, ChevronDown, Lock, Unlock, Palette, FlipHorizontal,
   FlipVertical, Star, Heart, Smile, Cloud, CloudOff, Loader2, CheckCircle2,
+  Share2, Eye, ZoomIn, ZoomOut, Grid3x3, Upload as UploadIcon, Smile as SmileIcon,
+  Shapes, Plus, PanelLeftClose,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { renderTemplateObjects } from "@/lib/templateRender";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const FONTS = [
   "Arial", "Georgia", "Times New Roman", "Courier New", "Verdana",
