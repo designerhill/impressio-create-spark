@@ -560,181 +560,433 @@ export const CardCanvas = () => {
   const isText = activeObject && (activeObject.type === "textbox" || activeObject.type === "i-text");
   const ao: any = activeObject || {};
 
+  const layers = canvas ? canvas.getObjects() : [];
+  const layerName = (o: FabricObject, i: number) => {
+    const a: any = o;
+    if (o.type === "textbox" || o.type === "i-text") {
+      const t = (a.text || "").trim();
+      return t ? (t.length > 22 ? t.slice(0, 22) + "…" : t) : `Text ${i + 1}`;
+    }
+    if (o.type === "image") return `Image ${i + 1}`;
+    return `${(o.type || "Shape").replace(/^./, (c) => c.toUpperCase())} ${i + 1}`;
+  };
+  const selectLayer = (o: FabricObject) => {
+    if (!canvas) return;
+    canvas.setActiveObject(o);
+    canvas.renderAll();
+    setActiveObject(o);
+  };
+
+  const handleShare = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      toast.success("Link copied to clipboard");
+    } catch {
+      toast.error("Could not copy link");
+    }
+  };
+
+  const tools = [
+    { id: "text" as const, icon: Type, label: "Text" },
+    { id: "shapes" as const, icon: Shapes, label: "Shapes" },
+    { id: "stickers" as const, icon: SmileIcon, label: "Stickers" },
+    { id: "bg" as const, icon: Palette, label: "Background" },
+    { id: "upload" as const, icon: UploadIcon, label: "Upload" },
+    { id: "ai" as const, icon: Sparkles, label: "AI" },
+  ];
+
   return (
-    <div className="space-y-6">
-      {/* Top toolbar: occasion + actions */}
-      <div className="bg-white/80 backdrop-blur-lg rounded-2xl p-4 border border-border shadow-elegant flex flex-wrap gap-3 items-end">
-        <div className="min-w-[160px]">
-          <Label>Occasion</Label>
-          <Select value={occasion} onValueChange={setOccasion}>
-            <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="birthday">Birthday</SelectItem>
-              <SelectItem value="anniversary">Anniversary</SelectItem>
-              <SelectItem value="congratulations">Congratulations</SelectItem>
-              <SelectItem value="thank-you">Thank You</SelectItem>
-              <SelectItem value="holiday">Holiday</SelectItem>
-              <SelectItem value="wedding">Wedding</SelectItem>
-              <SelectItem value="baby">Baby</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="min-w-[180px]">
-          <Label>Recipient (Optional)</Label>
-          <Input value={recipientName} onChange={(e) => setRecipientName(e.target.value)} placeholder="John Doe" className="mt-1" />
-        </div>
-        <div className="ml-auto flex flex-wrap gap-2">
-          <AutosaveBadge status={saveStatus} lastSavedAt={lastSavedAt} signedIn={!!user} />
-          <Button size="sm" variant="outline" onClick={undo} disabled={historyIndex.current <= 0}><Undo2 className="w-4 h-4" /></Button>
-          <Button size="sm" variant="outline" onClick={redo} disabled={historyIndex.current >= historyRef.current.length - 1}><Redo2 className="w-4 h-4" /></Button>
-          <Button size="sm" onClick={handleSave} disabled={isSaving}><Save className="w-4 h-4 mr-2" />{isSaving ? "Saving..." : "Save"}</Button>
-          <Button size="sm" variant="outline" onClick={handleExport}><Download className="w-4 h-4 mr-2" />Export PNG</Button>
-        </div>
-      </div>
+    <TooltipProvider delayDuration={150}>
+      <div className="flex flex-col h-[calc(100vh-4rem)] bg-slate-50 text-slate-900">
+        {/* Header */}
+        <header className="h-14 flex items-center gap-3 px-4 border-b border-slate-200 bg-white shrink-0">
+          <div className="flex items-center gap-2 min-w-0">
+            <Input
+              value={projectTitle}
+              onChange={(e) => setProjectTitle(e.target.value)}
+              onFocus={(e) => projectTitle === "Untitled Card" && e.target.select()}
+              className="h-9 w-[240px] font-medium border-transparent hover:border-slate-200 focus-visible:border-slate-300 focus-visible:ring-0 px-2"
+            />
+            <span className="text-xs text-slate-500 hidden md:inline whitespace-nowrap">
+              {lastSavedAt
+                ? `Last saved ${lastSavedAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`
+                : "Not saved yet"}
+            </span>
+          </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-6">
-        {/* Left tools panel */}
-        <div className="bg-white/80 backdrop-blur-lg rounded-2xl border border-border shadow-elegant p-4">
-          <Tabs defaultValue="text">
-            <TabsList className="grid grid-cols-5 w-full">
-              <TabsTrigger value="text"><Type className="w-4 h-4" /></TabsTrigger>
-              <TabsTrigger value="shapes"><Square className="w-4 h-4" /></TabsTrigger>
-              <TabsTrigger value="bg"><Palette className="w-4 h-4" /></TabsTrigger>
-              <TabsTrigger value="ai"><Sparkles className="w-4 h-4" /></TabsTrigger>
-              <TabsTrigger value="upload"><ImageIcon className="w-4 h-4" /></TabsTrigger>
-            </TabsList>
+          <div className="ml-auto flex items-center gap-2">
+            <AutosaveBadge status={saveStatus} lastSavedAt={lastSavedAt} signedIn={!!user} />
+            <Separator orientation="vertical" className="h-6" />
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button size="sm" variant="ghost" onClick={undo} disabled={historyIndex.current <= 0}>
+                  <Undo2 className="w-4 h-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Undo (⌘Z)</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button size="sm" variant="ghost" onClick={redo} disabled={historyIndex.current >= historyRef.current.length - 1}>
+                  <Redo2 className="w-4 h-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Redo (⌘⇧Z)</TooltipContent>
+            </Tooltip>
+            <Separator orientation="vertical" className="h-6" />
+            <Button size="sm" variant="ghost" onClick={handleShare}>
+              <Share2 className="w-4 h-4 mr-1.5" /> Share
+            </Button>
+            <Button size="sm" variant="outline" onClick={handleExport}>
+              <Download className="w-4 h-4 mr-1.5" /> Export
+            </Button>
+            <Button size="sm" onClick={handleSave} disabled={isSaving} className="bg-violet-600 hover:bg-violet-700 text-white">
+              <Save className="w-4 h-4 mr-1.5" />{isSaving ? "Saving…" : "Save"}
+            </Button>
+          </div>
+        </header>
 
-            <TabsContent value="text" className="space-y-2 mt-4">
-              <Button className="w-full justify-start" variant="secondary" onClick={addHeading}>Add Heading</Button>
-              <Button className="w-full justify-start" variant="secondary" onClick={addSubheading}>Add Subheading</Button>
-              <Button className="w-full justify-start" variant="secondary" onClick={handleAddText}>Add Body Text</Button>
-              <Separator className="my-3" />
-              <Label className="text-xs">Stickers & Emojis</Label>
-              <div className="grid grid-cols-6 gap-1">
-                {STICKERS.map((s) => (
-                  <button key={s} onClick={() => addSticker(s)} className="text-2xl hover:bg-muted rounded p-1">{s}</button>
-                ))}
-              </div>
-            </TabsContent>
-
-            <TabsContent value="shapes" className="space-y-2 mt-4">
-              <Button className="w-full justify-start" variant="secondary" onClick={addRect}><Square className="w-4 h-4 mr-2" />Rectangle</Button>
-              <Button className="w-full justify-start" variant="secondary" onClick={addCircle}><CircleIcon className="w-4 h-4 mr-2" />Circle</Button>
-              <Button className="w-full justify-start" variant="secondary" onClick={addTriangle}><TriangleIcon className="w-4 h-4 mr-2" />Triangle</Button>
-              <Button className="w-full justify-start" variant="secondary" onClick={addLine}><Minus className="w-4 h-4 mr-2" />Line</Button>
-            </TabsContent>
-
-            <TabsContent value="bg" className="space-y-3 mt-4">
-              <Label className="text-xs">Solid Colors</Label>
-              <div className="grid grid-cols-4 gap-2">
-                {PRESET_BACKGROUNDS.map((b) => (
-                  <button key={b.value} title={b.name} onClick={() => setSolidBg(b.value)}
-                    className="h-10 rounded-md border border-border hover:scale-105 transition" style={{ background: b.value }} />
-                ))}
-              </div>
-              <Label className="text-xs">Custom Color</Label>
-              <input type="color" onChange={(e) => setSolidBg(e.target.value)} className="w-full h-10 rounded-md cursor-pointer border border-border" />
-              <Separator />
-              <Label className="text-xs">Gradients</Label>
-              <div className="grid grid-cols-2 gap-2">
-                {GRADIENT_PRESETS.map((g) => (
-                  <button key={g.name} onClick={() => setGradientBg(g.from, g.to)} className="h-12 rounded-md border border-border hover:scale-105 transition"
-                    style={{ background: `linear-gradient(135deg, ${g.from}, ${g.to})` }}>
-                    <span className="text-xs text-white drop-shadow">{g.name}</span>
+        {/* Workspace */}
+        <div className="flex-1 flex min-h-0">
+          {/* Tool rail */}
+          <nav className="w-16 shrink-0 bg-white border-r border-slate-200 flex flex-col items-center py-3 gap-1">
+            {tools.map((t) => (
+              <Tooltip key={t.id}>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={() => setActiveTool(t.id)}
+                    className={`w-12 h-12 rounded-lg flex flex-col items-center justify-center gap-0.5 text-[10px] font-medium transition ${
+                      activeTool === t.id
+                        ? "bg-violet-50 text-violet-700"
+                        : "text-slate-600 hover:bg-slate-100"
+                    }`}
+                  >
+                    <t.icon className="w-5 h-5" />
+                    {t.label}
                   </button>
-                ))}
-              </div>
-            </TabsContent>
+                </TooltipTrigger>
+                <TooltipContent side="right">{t.label}</TooltipContent>
+              </Tooltip>
+            ))}
+          </nav>
 
-            <TabsContent value="ai" className="space-y-2 mt-4">
-              <Button className="w-full" variant="accent" onClick={handleGenerateMessage} disabled={isGenerating}>
-                <Sparkles className="w-4 h-4 mr-2" />{isGenerating ? "Generating..." : "AI Message"}
-              </Button>
-              <Button className="w-full" variant="gold" onClick={handleGenerateBackground} disabled={isGeneratingImage}>
-                <Wand2 className="w-4 h-4 mr-2" />{isGeneratingImage ? "Generating..." : "AI Background"}
-              </Button>
-              <p className="text-xs text-muted-foreground mt-2">Uses occasion + recipient as context.</p>
-            </TabsContent>
+          {/* Tool panel */}
+          <aside className="w-[280px] shrink-0 bg-white border-r border-slate-200 overflow-y-auto">
+            <div className="p-4">
+              <h3 className="text-sm font-semibold text-slate-900 mb-3 capitalize">
+                {tools.find((x) => x.id === activeTool)?.label}
+              </h3>
 
-            <TabsContent value="upload" className="space-y-2 mt-4">
-              <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
-              <Button className="w-full" variant="secondary" onClick={() => fileInputRef.current?.click()}>
-                <ImageIcon className="w-4 h-4 mr-2" />Upload Image
-              </Button>
-              <p className="text-xs text-muted-foreground">PNG, JPG, SVG. Drag to position, drag corners to resize.</p>
-            </TabsContent>
-          </Tabs>
-        </div>
+              {activeTool === "text" && (
+                <div className="space-y-2">
+                  <Button className="w-full justify-start h-auto py-3" variant="outline" onClick={addHeading}>
+                    <span className="font-bold text-lg mr-2">T</span>
+                    <span className="text-left">
+                      <div className="font-semibold">Add a heading</div>
+                      <div className="text-xs text-slate-500 font-normal">Big, bold title</div>
+                    </span>
+                  </Button>
+                  <Button className="w-full justify-start h-auto py-3" variant="outline" onClick={addSubheading}>
+                    <span className="font-medium mr-2">T</span>
+                    <span className="text-left">
+                      <div className="font-medium">Add a subheading</div>
+                      <div className="text-xs text-slate-500 font-normal">Supporting line</div>
+                    </span>
+                  </Button>
+                  <Button className="w-full justify-start h-auto py-3" variant="outline" onClick={handleAddText}>
+                    <span className="text-sm mr-2">T</span>
+                    <span className="text-left">
+                      <div className="text-sm">Add body text</div>
+                      <div className="text-xs text-slate-500 font-normal">For longer messages</div>
+                    </span>
+                  </Button>
+                </div>
+              )}
 
-        {/* Canvas + contextual property bar */}
-        <div className="space-y-3">
-          {/* Property bar */}
-          <div className="bg-white/80 backdrop-blur-lg rounded-2xl p-3 border border-border shadow-elegant flex flex-wrap items-center gap-2 min-h-[58px]">
-            {!activeObject && (
-              <span className="text-sm text-muted-foreground px-2">Select an element to edit its properties.</span>
-            )}
-            {activeObject && (
-              <>
-                {isText && (
-                  <>
-                    <Select value={ao.fontFamily} onValueChange={(v) => updateActive({ fontFamily: v })}>
-                      <SelectTrigger className="w-[140px] h-9"><SelectValue placeholder="Font" /></SelectTrigger>
+              {activeTool === "shapes" && (
+                <div className="grid grid-cols-3 gap-2">
+                  <button onClick={addRect} className="aspect-square rounded-lg border border-slate-200 hover:border-violet-400 hover:bg-violet-50 flex items-center justify-center transition">
+                    <Square className="w-6 h-6 text-slate-700" />
+                  </button>
+                  <button onClick={addCircle} className="aspect-square rounded-lg border border-slate-200 hover:border-violet-400 hover:bg-violet-50 flex items-center justify-center transition">
+                    <CircleIcon className="w-6 h-6 text-slate-700" />
+                  </button>
+                  <button onClick={addTriangle} className="aspect-square rounded-lg border border-slate-200 hover:border-violet-400 hover:bg-violet-50 flex items-center justify-center transition">
+                    <TriangleIcon className="w-6 h-6 text-slate-700" />
+                  </button>
+                  <button onClick={addLine} className="aspect-square rounded-lg border border-slate-200 hover:border-violet-400 hover:bg-violet-50 flex items-center justify-center transition">
+                    <Minus className="w-6 h-6 text-slate-700" />
+                  </button>
+                </div>
+              )}
+
+              {activeTool === "stickers" && (
+                <div className="grid grid-cols-5 gap-2">
+                  {STICKERS.map((s) => (
+                    <button key={s} onClick={() => addSticker(s)} className="aspect-square text-2xl rounded-lg border border-slate-200 hover:border-violet-400 hover:bg-violet-50 transition">
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {activeTool === "bg" && (
+                <div className="space-y-4">
+                  <div>
+                    <Label className="text-xs text-slate-600 mb-2 block">Solid Colors</Label>
+                    <div className="grid grid-cols-4 gap-2">
+                      {PRESET_BACKGROUNDS.map((b) => (
+                        <button key={b.value} title={b.name} onClick={() => setSolidBg(b.value)}
+                          className="h-10 rounded-md border border-slate-200 hover:ring-2 hover:ring-violet-400 transition" style={{ background: b.value }} />
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <Label className="text-xs text-slate-600 mb-2 block">Custom Color</Label>
+                    <input type="color" onChange={(e) => setSolidBg(e.target.value)} className="w-full h-10 rounded-md cursor-pointer border border-slate-200" />
+                  </div>
+                  <div>
+                    <Label className="text-xs text-slate-600 mb-2 block">Gradients</Label>
+                    <div className="grid grid-cols-2 gap-2">
+                      {GRADIENT_PRESETS.map((g) => (
+                        <button key={g.name} onClick={() => setGradientBg(g.from, g.to)} className="h-14 rounded-md border border-slate-200 hover:ring-2 hover:ring-violet-400 transition flex items-end justify-center pb-1"
+                          style={{ background: `linear-gradient(135deg, ${g.from}, ${g.to})` }}>
+                          <span className="text-[10px] font-medium text-white drop-shadow">{g.name}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {activeTool === "upload" && (
+                <div className="space-y-2">
+                  <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    className="w-full border-2 border-dashed border-slate-300 hover:border-violet-400 hover:bg-violet-50 rounded-lg p-6 flex flex-col items-center gap-2 transition"
+                  >
+                    <UploadIcon className="w-6 h-6 text-slate-500" />
+                    <span className="text-sm font-medium text-slate-700">Upload image</span>
+                    <span className="text-xs text-slate-500">PNG, JPG, SVG</span>
+                  </button>
+                </div>
+              )}
+
+              {activeTool === "ai" && (
+                <div className="space-y-3">
+                  <div className="space-y-2">
+                    <Label className="text-xs text-slate-600">Occasion</Label>
+                    <Select value={occasion} onValueChange={setOccasion}>
+                      <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
                       <SelectContent>
-                        {FONTS.map((f) => <SelectItem key={f} value={f} style={{ fontFamily: f }}>{f}</SelectItem>)}
+                        <SelectItem value="birthday">Birthday</SelectItem>
+                        <SelectItem value="anniversary">Anniversary</SelectItem>
+                        <SelectItem value="congratulations">Congratulations</SelectItem>
+                        <SelectItem value="thank-you">Thank You</SelectItem>
+                        <SelectItem value="holiday">Holiday</SelectItem>
+                        <SelectItem value="wedding">Wedding</SelectItem>
+                        <SelectItem value="baby">Baby</SelectItem>
                       </SelectContent>
                     </Select>
-                    <Input type="number" className="w-[70px] h-9" value={Math.round(ao.fontSize || 16)}
-                      onChange={(e) => updateActive({ fontSize: Number(e.target.value) })} />
-                    <Button size="sm" variant={ao.fontWeight === "bold" ? "default" : "outline"} onClick={() => updateActive({ fontWeight: ao.fontWeight === "bold" ? "normal" : "bold" })}><Bold className="w-4 h-4" /></Button>
-                    <Button size="sm" variant={ao.fontStyle === "italic" ? "default" : "outline"} onClick={() => updateActive({ fontStyle: ao.fontStyle === "italic" ? "normal" : "italic" })}><Italic className="w-4 h-4" /></Button>
-                    <Button size="sm" variant={ao.underline ? "default" : "outline"} onClick={() => updateActive({ underline: !ao.underline })}><Underline className="w-4 h-4" /></Button>
-                    <Button size="sm" variant={ao.textAlign === "left" ? "default" : "outline"} onClick={() => updateActive({ textAlign: "left" })}><AlignLeft className="w-4 h-4" /></Button>
-                    <Button size="sm" variant={ao.textAlign === "center" ? "default" : "outline"} onClick={() => updateActive({ textAlign: "center" })}><AlignCenter className="w-4 h-4" /></Button>
-                    <Button size="sm" variant={ao.textAlign === "right" ? "default" : "outline"} onClick={() => updateActive({ textAlign: "right" })}><AlignRight className="w-4 h-4" /></Button>
-                  </>
-                )}
-                {(isText || activeObject.type === "rect" || activeObject.type === "circle" || activeObject.type === "triangle") && (
-                  <label className="flex items-center gap-1 text-xs">
-                    Fill
-                    <input type="color" value={typeof ao.fill === "string" ? ao.fill : "#000000"}
-                      onChange={(e) => updateActive({ fill: e.target.value })} className="h-8 w-10 rounded cursor-pointer border border-border" />
-                  </label>
-                )}
-                {(activeObject.type === "rect" || activeObject.type === "circle" || activeObject.type === "triangle" || activeObject.type === "line") && (
-                  <label className="flex items-center gap-1 text-xs">
-                    Stroke
-                    <input type="color" value={typeof ao.stroke === "string" ? ao.stroke : "#000000"}
-                      onChange={(e) => updateActive({ stroke: e.target.value })} className="h-8 w-10 rounded cursor-pointer border border-border" />
-                  </label>
-                )}
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button size="sm" variant="outline">Opacity</Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-48">
-                    <Slider value={[Math.round((ao.opacity ?? 1) * 100)]} min={0} max={100} step={1}
-                      onValueChange={(v) => updateActive({ opacity: v[0] / 100 })} />
-                  </PopoverContent>
-                </Popover>
-                <Separator orientation="vertical" className="h-8" />
-                <Button size="sm" variant="outline" onClick={flipH}><FlipHorizontal className="w-4 h-4" /></Button>
-                <Button size="sm" variant="outline" onClick={flipV}><FlipVertical className="w-4 h-4" /></Button>
-                <Button size="sm" variant="outline" onClick={bringForward}><ChevronUp className="w-4 h-4" /></Button>
-                <Button size="sm" variant="outline" onClick={sendBackward}><ChevronDown className="w-4 h-4" /></Button>
-                <Button size="sm" variant="outline" onClick={toggleLock}>{ao.lockMovementX ? <Lock className="w-4 h-4" /> : <Unlock className="w-4 h-4" />}</Button>
-                <Button size="sm" variant="outline" onClick={duplicateActive}><Copy className="w-4 h-4" /></Button>
-                <Button size="sm" variant="destructive" onClick={deleteActive}><Trash2 className="w-4 h-4" /></Button>
-              </>
-            )}
-          </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-xs text-slate-600">Recipient (optional)</Label>
+                    <Input value={recipientName} onChange={(e) => setRecipientName(e.target.value)} placeholder="e.g. Sarah" className="h-9" />
+                  </div>
+                  <Button className="w-full bg-violet-600 hover:bg-violet-700 text-white" onClick={handleGenerateMessage} disabled={isGenerating}>
+                    <Sparkles className="w-4 h-4 mr-2" />{isGenerating ? "Generating…" : "Generate message"}
+                  </Button>
+                  <Button className="w-full" variant="outline" onClick={handleGenerateBackground} disabled={isGeneratingImage}>
+                    <Wand2 className="w-4 h-4 mr-2" />{isGeneratingImage ? "Generating…" : "Generate background"}
+                  </Button>
+                </div>
+              )}
+            </div>
+          </aside>
 
-          {/* Canvas */}
-          <div className="bg-white/80 backdrop-blur-lg rounded-2xl p-6 border border-border shadow-elegant overflow-auto">
-            <canvas ref={canvasRef} className="border border-border rounded-lg shadow-lg mx-auto" />
-          </div>
+          {/* Canvas stage */}
+          <section className="flex-1 min-w-0 flex flex-col bg-slate-100">
+            {/* Contextual property bar */}
+            <div className="h-12 px-3 border-b border-slate-200 bg-white flex items-center gap-1.5 overflow-x-auto shrink-0">
+              {!activeObject && (
+                <span className="text-xs text-slate-500 px-2">Select an element on the canvas to edit it.</span>
+              )}
+              {activeObject && (
+                <>
+                  {isText && (
+                    <>
+                      <Select value={ao.fontFamily} onValueChange={(v) => updateActive({ fontFamily: v })}>
+                        <SelectTrigger className="w-[140px] h-8"><SelectValue placeholder="Font" /></SelectTrigger>
+                        <SelectContent>
+                          {FONTS.map((f) => <SelectItem key={f} value={f} style={{ fontFamily: f }}>{f}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                      <Input type="number" className="w-[64px] h-8" value={Math.round(ao.fontSize || 16)}
+                        onChange={(e) => updateActive({ fontSize: Number(e.target.value) })} />
+                      <Button size="sm" variant={ao.fontWeight === "bold" ? "default" : "ghost"} className="h-8 w-8 p-0" onClick={() => updateActive({ fontWeight: ao.fontWeight === "bold" ? "normal" : "bold" })}><Bold className="w-4 h-4" /></Button>
+                      <Button size="sm" variant={ao.fontStyle === "italic" ? "default" : "ghost"} className="h-8 w-8 p-0" onClick={() => updateActive({ fontStyle: ao.fontStyle === "italic" ? "normal" : "italic" })}><Italic className="w-4 h-4" /></Button>
+                      <Button size="sm" variant={ao.underline ? "default" : "ghost"} className="h-8 w-8 p-0" onClick={() => updateActive({ underline: !ao.underline })}><Underline className="w-4 h-4" /></Button>
+                      <Separator orientation="vertical" className="h-6 mx-1" />
+                      <Button size="sm" variant={ao.textAlign === "left" ? "default" : "ghost"} className="h-8 w-8 p-0" onClick={() => updateActive({ textAlign: "left" })}><AlignLeft className="w-4 h-4" /></Button>
+                      <Button size="sm" variant={ao.textAlign === "center" ? "default" : "ghost"} className="h-8 w-8 p-0" onClick={() => updateActive({ textAlign: "center" })}><AlignCenter className="w-4 h-4" /></Button>
+                      <Button size="sm" variant={ao.textAlign === "right" ? "default" : "ghost"} className="h-8 w-8 p-0" onClick={() => updateActive({ textAlign: "right" })}><AlignRight className="w-4 h-4" /></Button>
+                      <Separator orientation="vertical" className="h-6 mx-1" />
+                    </>
+                  )}
+                  {(isText || activeObject.type === "rect" || activeObject.type === "circle" || activeObject.type === "triangle") && (
+                    <label className="flex items-center gap-1.5 text-xs">
+                      <span className="text-slate-600">Fill</span>
+                      <input type="color" value={typeof ao.fill === "string" ? ao.fill : "#000000"}
+                        onChange={(e) => updateActive({ fill: e.target.value })} className="h-7 w-8 rounded cursor-pointer border border-slate-200" />
+                    </label>
+                  )}
+                  {(activeObject.type === "rect" || activeObject.type === "circle" || activeObject.type === "triangle" || activeObject.type === "line") && (
+                    <label className="flex items-center gap-1.5 text-xs">
+                      <span className="text-slate-600">Stroke</span>
+                      <input type="color" value={typeof ao.stroke === "string" ? ao.stroke : "#000000"}
+                        onChange={(e) => updateActive({ stroke: e.target.value })} className="h-7 w-8 rounded cursor-pointer border border-slate-200" />
+                    </label>
+                  )}
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button size="sm" variant="ghost" className="h-8">Opacity</Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-48">
+                      <Slider value={[Math.round((ao.opacity ?? 1) * 100)]} min={0} max={100} step={1}
+                        onValueChange={(v) => updateActive({ opacity: v[0] / 100 })} />
+                    </PopoverContent>
+                  </Popover>
+                  <div className="ml-auto flex items-center gap-1">
+                    <Tooltip><TooltipTrigger asChild><Button size="sm" variant="ghost" className="h-8 w-8 p-0" onClick={flipH}><FlipHorizontal className="w-4 h-4" /></Button></TooltipTrigger><TooltipContent>Flip horizontal</TooltipContent></Tooltip>
+                    <Tooltip><TooltipTrigger asChild><Button size="sm" variant="ghost" className="h-8 w-8 p-0" onClick={flipV}><FlipVertical className="w-4 h-4" /></Button></TooltipTrigger><TooltipContent>Flip vertical</TooltipContent></Tooltip>
+                    <Tooltip><TooltipTrigger asChild><Button size="sm" variant="ghost" className="h-8 w-8 p-0" onClick={bringForward}><ChevronUp className="w-4 h-4" /></Button></TooltipTrigger><TooltipContent>Bring forward</TooltipContent></Tooltip>
+                    <Tooltip><TooltipTrigger asChild><Button size="sm" variant="ghost" className="h-8 w-8 p-0" onClick={sendBackward}><ChevronDown className="w-4 h-4" /></Button></TooltipTrigger><TooltipContent>Send backward</TooltipContent></Tooltip>
+                    <Tooltip><TooltipTrigger asChild><Button size="sm" variant="ghost" className="h-8 w-8 p-0" onClick={toggleLock}>{ao.lockMovementX ? <Lock className="w-4 h-4" /> : <Unlock className="w-4 h-4" />}</Button></TooltipTrigger><TooltipContent>Lock</TooltipContent></Tooltip>
+                    <Tooltip><TooltipTrigger asChild><Button size="sm" variant="ghost" className="h-8 w-8 p-0" onClick={duplicateActive}><Copy className="w-4 h-4" /></Button></TooltipTrigger><TooltipContent>Duplicate</TooltipContent></Tooltip>
+                    <Tooltip><TooltipTrigger asChild><Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-rose-600 hover:text-rose-700 hover:bg-rose-50" onClick={deleteActive}><Trash2 className="w-4 h-4" /></Button></TooltipTrigger><TooltipContent>Delete</TooltipContent></Tooltip>
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Canvas area */}
+            <div
+              className="flex-1 overflow-auto p-8 relative"
+              style={
+                showGrid
+                  ? {
+                      backgroundImage:
+                        "linear-gradient(to right, rgba(15,23,42,0.06) 1px, transparent 1px), linear-gradient(to bottom, rgba(15,23,42,0.06) 1px, transparent 1px)",
+                      backgroundSize: "20px 20px",
+                    }
+                  : undefined
+              }
+            >
+              <div className="mx-auto inline-block shadow-[0_20px_50px_-20px_rgba(15,23,42,0.25)] rounded-md bg-white">
+                <canvas ref={canvasRef} className="rounded-md block" />
+              </div>
+            </div>
+
+            {/* Status / zoom bar */}
+            <div className="h-10 px-4 border-t border-slate-200 bg-white flex items-center gap-3 text-xs text-slate-600 shrink-0">
+              <span>600 × 400 px</span>
+              <Separator orientation="vertical" className="h-5" />
+              <button
+                onClick={() => setShowGrid((g) => !g)}
+                className={`inline-flex items-center gap-1.5 px-2 py-1 rounded hover:bg-slate-100 ${showGrid ? "text-violet-700" : ""}`}
+              >
+                <Grid3x3 className="w-3.5 h-3.5" /> Grid
+              </button>
+              <div className="ml-auto flex items-center gap-1">
+                <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => setZoom((z) => Math.max(0.25, +(z - 0.1).toFixed(2)))}>
+                  <ZoomOut className="w-4 h-4" />
+                </Button>
+                <button onClick={() => setZoom(1)} className="px-2 py-1 rounded hover:bg-slate-100 tabular-nums w-14 text-center">
+                  {Math.round(zoom * 100)}%
+                </button>
+                <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => setZoom((z) => Math.min(3, +(z + 0.1).toFixed(2)))}>
+                  <ZoomIn className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+          </section>
+
+          {/* Right: Layers + properties hints */}
+          {showLayers && (
+            <aside className="w-[260px] shrink-0 bg-white border-l border-slate-200 flex flex-col">
+              <div className="h-12 px-4 border-b border-slate-200 flex items-center justify-between shrink-0">
+                <div className="flex items-center gap-2 text-sm font-semibold text-slate-900">
+                  <Layers className="w-4 h-4" /> Layers
+                </div>
+                <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => setShowLayers(false)}>
+                  <PanelLeftClose className="w-4 h-4" />
+                </Button>
+              </div>
+              <div className="flex-1 overflow-y-auto p-2">
+                {layers.length === 0 ? (
+                  <div className="text-center px-4 py-8 text-xs text-slate-500">
+                    No layers yet. Add text, shapes or images from the left panel.
+                  </div>
+                ) : (
+                  <ul className="space-y-1">
+                    {[...layers].reverse().map((o, idx) => {
+                      const realIdx = layers.length - 1 - idx;
+                      const selected = activeObject === o;
+                      return (
+                        <li key={realIdx}>
+                          <button
+                            onClick={() => selectLayer(o)}
+                            className={`w-full flex items-center gap-2 px-2 py-2 rounded-md text-left text-sm transition ${
+                              selected
+                                ? "bg-violet-50 text-violet-900 ring-1 ring-violet-200"
+                                : "hover:bg-slate-100 text-slate-700"
+                            }`}
+                          >
+                            <span className="w-6 h-6 rounded bg-slate-100 grid place-items-center text-slate-500 shrink-0">
+                              {o.type === "textbox" || o.type === "i-text" ? (
+                                <Type className="w-3.5 h-3.5" />
+                              ) : o.type === "image" ? (
+                                <ImageIcon className="w-3.5 h-3.5" />
+                              ) : o.type === "circle" ? (
+                                <CircleIcon className="w-3.5 h-3.5" />
+                              ) : o.type === "triangle" ? (
+                                <TriangleIcon className="w-3.5 h-3.5" />
+                              ) : o.type === "line" ? (
+                                <Minus className="w-3.5 h-3.5" />
+                              ) : (
+                                <Square className="w-3.5 h-3.5" />
+                              )}
+                            </span>
+                            <span className="truncate flex-1">{layerName(o, realIdx)}</span>
+                            {(o as any).lockMovementX && <Lock className="w-3 h-3 text-slate-400" />}
+                          </button>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+              </div>
+              {!activeObject && layers.length > 0 && (
+                <div className="border-t border-slate-200 p-4 text-xs text-slate-500">
+                  <div className="font-medium text-slate-700 mb-1">Nothing selected</div>
+                  Click any layer above or any element on the canvas to edit its properties.
+                </div>
+              )}
+            </aside>
+          )}
+          {!showLayers && (
+            <button
+              onClick={() => setShowLayers(true)}
+              className="w-8 shrink-0 bg-white border-l border-slate-200 flex items-center justify-center text-slate-500 hover:bg-slate-50"
+              title="Show layers"
+            >
+              <Layers className="w-4 h-4" />
+            </button>
+          )}
         </div>
       </div>
-    </div>
+    </TooltipProvider>
   );
 };
 
