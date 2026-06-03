@@ -79,6 +79,15 @@ export const CardCanvas = () => {
   const refresh = () => forceUpdate((n) => n + 1);
   const { user } = useAuth();
 
+  // UI state
+  const [projectTitle, setProjectTitle] = useState("Untitled Card");
+  const [activeTool, setActiveTool] = useState<
+    "text" | "shapes" | "bg" | "ai" | "upload" | "stickers"
+  >("text");
+  const [zoom, setZoom] = useState(1);
+  const [showGrid, setShowGrid] = useState(false);
+  const [showLayers, setShowLayers] = useState(true);
+
   // autosave
   const designIdRef = useRef<string | null>(searchParams.get("designId"));
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
