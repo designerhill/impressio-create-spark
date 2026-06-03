@@ -152,7 +152,7 @@ export const CardCanvas = () => {
         if (!silent) toast.error(e?.message || "Failed to save");
       }
     },
-    [canvas, user, occasion, recipientName]
+    [canvas, user, occasion, recipientName, projectTitle]
   );
 
   const scheduleAutosave = useCallback(() => {
