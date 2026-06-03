@@ -118,7 +118,10 @@ export const CardCanvas = () => {
       try {
         const designData = canvas.toJSON();
         const dataUrl = canvas.toDataURL({ format: "png", multiplier: 1 });
-        const title = `${occasion} Card${recipientName ? ` for ${recipientName}` : ""}`;
+        const title =
+          projectTitle && projectTitle.trim() && projectTitle !== "Untitled Card"
+            ? projectTitle
+            : `${occasion} Card${recipientName ? ` for ${recipientName}` : ""}`;
         if (designIdRef.current) {
           const { error } = await supabase
             .from("designs")
