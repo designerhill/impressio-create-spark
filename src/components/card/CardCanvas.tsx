@@ -182,6 +182,15 @@ export const CardCanvas = () => {
     };
   }, []);
 
+  // Apply zoom whenever it changes
+  useEffect(() => {
+    if (!canvas) return;
+    canvas.setZoom(zoom);
+    canvas.setWidth(600 * zoom);
+    canvas.setHeight(400 * zoom);
+    canvas.renderAll();
+  }, [zoom, canvas]);
+
   useEffect(() => {
     if (!canvasRef.current) return;
 
