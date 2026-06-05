@@ -818,6 +818,67 @@ export const CertificateCanvas = () => {
                 </div>
               )}
 
+              {activeTool === "presets" && (
+                <div className="space-y-2">
+                  <p className="text-xs text-slate-500 mb-2">
+                    One-click text layouts with matching fonts. Replaces existing text.
+                  </p>
+                  {CERT_PRESETS.map((p) => {
+                    const heading = p.items[0];
+                    const sub = p.items[1];
+                    return (
+                      <button
+                        key={p.id}
+                        onClick={() => applyTextPreset(p)}
+                        className="w-full text-left rounded-lg border border-slate-200 hover:border-violet-400 hover:bg-violet-50/40 p-3 transition group"
+                      >
+                        <div
+                          className="rounded-md border border-slate-100 bg-white px-3 py-3 mb-2 flex flex-col items-center justify-center min-h-[70px]"
+                          style={{ borderTop: `3px solid ${p.accent}` }}
+                        >
+                          <span
+                            className="truncate max-w-full"
+                            style={{
+                              fontFamily: heading.fontFamily,
+                              fontWeight: heading.fontWeight as any,
+                              fontStyle: heading.fontStyle as any,
+                              color: heading.fill,
+                              fontSize: 18,
+                              letterSpacing: heading.charSpacing ? `${(heading.charSpacing / 1000) * 0.5}em` : undefined,
+                            }}
+                          >
+                            {heading.text}
+                          </span>
+                          {sub && (
+                            <span
+                              className="truncate max-w-full mt-1"
+                              style={{
+                                fontFamily: sub.fontFamily,
+                                fontStyle: sub.fontStyle as any,
+                                color: sub.fill,
+                                fontSize: 11,
+                              }}
+                            >
+                              {sub.text}
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <div className="text-sm font-semibold text-slate-900">{p.name}</div>
+                            <div className="text-[11px] text-slate-500">{p.description}</div>
+                          </div>
+                          <span
+                            className="inline-block w-3 h-3 rounded-full shrink-0"
+                            style={{ background: p.accent }}
+                          />
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+
               {activeTool === "stickers" && (
                 <div className="grid grid-cols-5 gap-2">
                   {STICKERS.map((s) => (
