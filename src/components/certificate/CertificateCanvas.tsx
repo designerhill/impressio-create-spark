@@ -24,7 +24,7 @@ import {
   Undo2, Redo2, AlignLeft, AlignCenter, AlignRight, Bold, Italic, Underline,
   Layers, ChevronUp, ChevronDown, Lock, Unlock, Palette, FlipHorizontal,
   FlipVertical, Share2, ZoomIn, ZoomOut, Grid3x3, Upload as UploadIcon,
-  Smile as SmileIcon, Shapes, PanelLeftClose, FileText,
+  Smile as SmileIcon, Shapes, PanelLeftClose, FileText, LayoutTemplate,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
