@@ -59,6 +59,124 @@ const GRADIENT_PRESETS = [
 
 const STICKERS = ["🏆", "🥇", "🎖️", "🏅", "⭐", "✨", "📜", "🎓", "🌟", "👑", "💎", "🪄"];
 
+type PresetItem = {
+  text: string;
+  top: number;
+  fontSize: number;
+  fontFamily: string;
+  fill: string;
+  fontWeight?: string | number;
+  fontStyle?: string;
+  textAlign?: "left" | "center" | "right";
+  charSpacing?: number;
+  width?: number;
+};
+
+type CertPreset = {
+  id: string;
+  name: string;
+  description: string;
+  accent: string;
+  items: PresetItem[];
+  decor?: "underline" | "double-line" | "none";
+};
+
+const CERT_PRESETS: CertPreset[] = [
+  {
+    id: "classic-gold",
+    name: "Classic Gold",
+    description: "Traditional serif with gold accents",
+    accent: "#D4AF37",
+    decor: "double-line",
+    items: [
+      { text: "CERTIFICATE", top: 90, fontSize: 56, fontFamily: "Georgia", fill: "#1f2937", fontWeight: "bold", textAlign: "center", charSpacing: 600 },
+      { text: "OF ACHIEVEMENT", top: 160, fontSize: 22, fontFamily: "Georgia", fill: "#6b7280", textAlign: "center", charSpacing: 800 },
+      { text: "This certificate is proudly presented to", top: 230, fontSize: 18, fontFamily: "Georgia", fill: "#374151", fontStyle: "italic", textAlign: "center" },
+      { text: "Recipient Name", top: 280, fontSize: 48, fontFamily: "Brush Script MT", fill: "#1f2937", textAlign: "center" },
+      { text: "For outstanding performance and dedication\nin recognition of exceptional achievement.", top: 370, fontSize: 16, fontFamily: "Georgia", fill: "#4b5563", textAlign: "center" },
+      { text: "Date", top: 500, fontSize: 14, fontFamily: "Georgia", fill: "#6b7280", textAlign: "center", width: 200 },
+      { text: "Signature", top: 500, fontSize: 14, fontFamily: "Georgia", fill: "#6b7280", textAlign: "center", width: 200 },
+    ],
+  },
+  {
+    id: "modern-minimal",
+    name: "Modern Minimal",
+    description: "Clean sans-serif, lots of whitespace",
+    accent: "#111827",
+    decor: "underline",
+    items: [
+      { text: "Certificate of Completion", top: 110, fontSize: 38, fontFamily: "Verdana", fill: "#111827", fontWeight: "bold", textAlign: "center" },
+      { text: "AWARDED TO", top: 220, fontSize: 14, fontFamily: "Verdana", fill: "#9ca3af", textAlign: "center", charSpacing: 400 },
+      { text: "Recipient Name", top: 260, fontSize: 44, fontFamily: "Verdana", fill: "#111827", fontWeight: "bold", textAlign: "center" },
+      { text: "for successfully completing the program with distinction.", top: 360, fontSize: 16, fontFamily: "Verdana", fill: "#4b5563", textAlign: "center" },
+      { text: "DATE", top: 490, fontSize: 12, fontFamily: "Verdana", fill: "#9ca3af", textAlign: "center", width: 200, charSpacing: 200 },
+      { text: "SIGNATURE", top: 490, fontSize: 12, fontFamily: "Verdana", fill: "#9ca3af", textAlign: "center", width: 200, charSpacing: 200 },
+    ],
+  },
+  {
+    id: "elegant-script",
+    name: "Elegant Script",
+    description: "Script headings, romantic feel",
+    accent: "#9b6b3f",
+    decor: "double-line",
+    items: [
+      { text: "Certificate", top: 90, fontSize: 72, fontFamily: "Brush Script MT", fill: "#7c4a1e", textAlign: "center" },
+      { text: "of Excellence", top: 180, fontSize: 26, fontFamily: "Palatino", fill: "#7c4a1e", fontStyle: "italic", textAlign: "center" },
+      { text: "presented to", top: 240, fontSize: 16, fontFamily: "Palatino", fill: "#6b7280", fontStyle: "italic", textAlign: "center" },
+      { text: "Recipient Name", top: 290, fontSize: 42, fontFamily: "Palatino", fill: "#1f2937", fontWeight: "bold", textAlign: "center" },
+      { text: "in heartfelt recognition of remarkable\ndedication and inspiring contribution.", top: 380, fontSize: 16, fontFamily: "Palatino", fill: "#4b5563", fontStyle: "italic", textAlign: "center" },
+      { text: "Date", top: 500, fontSize: 14, fontFamily: "Palatino", fill: "#6b7280", textAlign: "center", width: 200 },
+      { text: "Signature", top: 500, fontSize: 14, fontFamily: "Palatino", fill: "#6b7280", textAlign: "center", width: 200 },
+    ],
+  },
+  {
+    id: "corporate-bold",
+    name: "Corporate Bold",
+    description: "Strong impact heading, professional",
+    accent: "#1e40af",
+    decor: "underline",
+    items: [
+      { text: "CERTIFICATE OF APPRECIATION", top: 100, fontSize: 34, fontFamily: "Impact", fill: "#1e3a8a", textAlign: "center", charSpacing: 200 },
+      { text: "PRESENTED TO", top: 200, fontSize: 14, fontFamily: "Arial", fill: "#1e40af", textAlign: "center", fontWeight: "bold", charSpacing: 400 },
+      { text: "Recipient Name", top: 240, fontSize: 50, fontFamily: "Arial", fill: "#111827", fontWeight: "bold", textAlign: "center" },
+      { text: "In recognition of valuable contributions and exemplary service\nto the organization throughout the year.", top: 340, fontSize: 16, fontFamily: "Arial", fill: "#374151", textAlign: "center" },
+      { text: "Date", top: 500, fontSize: 13, fontFamily: "Arial", fill: "#6b7280", textAlign: "center", width: 200, fontWeight: "bold" },
+      { text: "Authorized Signature", top: 500, fontSize: 13, fontFamily: "Arial", fill: "#6b7280", textAlign: "center", width: 200, fontWeight: "bold" },
+    ],
+  },
+  {
+    id: "academic",
+    name: "Academic Diploma",
+    description: "University-style, formal Latin feel",
+    accent: "#4c1d95",
+    decor: "double-line",
+    items: [
+      { text: "The Institute of Excellence", top: 80, fontSize: 20, fontFamily: "Times New Roman", fill: "#4c1d95", fontStyle: "italic", textAlign: "center" },
+      { text: "Diploma of Honor", top: 130, fontSize: 48, fontFamily: "Times New Roman", fill: "#1f2937", fontWeight: "bold", textAlign: "center" },
+      { text: "Be it known that", top: 220, fontSize: 16, fontFamily: "Times New Roman", fill: "#4b5563", fontStyle: "italic", textAlign: "center" },
+      { text: "Recipient Name", top: 260, fontSize: 40, fontFamily: "Times New Roman", fill: "#1f2937", textAlign: "center" },
+      { text: "having satisfied all requirements is hereby granted this diploma\nwith all rights, honors, and privileges thereto appertaining.", top: 340, fontSize: 16, fontFamily: "Times New Roman", fill: "#4b5563", textAlign: "center" },
+      { text: "Date Conferred", top: 500, fontSize: 13, fontFamily: "Times New Roman", fill: "#6b7280", textAlign: "center", width: 200, fontStyle: "italic" },
+      { text: "Dean's Signature", top: 500, fontSize: 13, fontFamily: "Times New Roman", fill: "#6b7280", textAlign: "center", width: 200, fontStyle: "italic" },
+    ],
+  },
+  {
+    id: "playful",
+    name: "Playful Award",
+    description: "Fun, casual — great for kids & events",
+    accent: "#ec4899",
+    decor: "none",
+    items: [
+      { text: "🌟 Super Star Award 🌟", top: 100, fontSize: 42, fontFamily: "Comic Sans MS", fill: "#db2777", fontWeight: "bold", textAlign: "center" },
+      { text: "goes to", top: 200, fontSize: 22, fontFamily: "Comic Sans MS", fill: "#7c3aed", textAlign: "center" },
+      { text: "Recipient Name", top: 250, fontSize: 48, fontFamily: "Comic Sans MS", fill: "#1f2937", fontWeight: "bold", textAlign: "center" },
+      { text: "for being amazing, working hard, and making\neveryone smile every single day! 🎉", top: 360, fontSize: 18, fontFamily: "Comic Sans MS", fill: "#374151", textAlign: "center" },
+      { text: "Date", top: 500, fontSize: 14, fontFamily: "Comic Sans MS", fill: "#6b7280", textAlign: "center", width: 200 },
+      { text: "Signed", top: 500, fontSize: 14, fontFamily: "Comic Sans MS", fill: "#6b7280", textAlign: "center", width: 200 },
+    ],
+  },
+];
+
 export const CertificateCanvas = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [canvas, setCanvas] = useState<FabricCanvas | null>(null);
