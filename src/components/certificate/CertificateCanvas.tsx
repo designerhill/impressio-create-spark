@@ -688,6 +688,7 @@ export const CertificateCanvas = () => {
 
   const tools = [
     { id: "text" as const, icon: Type, label: "Text" },
+    { id: "presets" as const, icon: LayoutTemplate, label: "Presets" },
     { id: "shapes" as const, icon: Shapes, label: "Shapes" },
     { id: "stickers" as const, icon: SmileIcon, label: "Stickers" },
     { id: "bg" as const, icon: Palette, label: "Background" },
