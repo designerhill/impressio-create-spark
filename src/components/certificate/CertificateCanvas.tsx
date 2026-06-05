@@ -537,6 +537,73 @@ export const CertificateCanvas = () => {
     fill: "#374151", textAlign: "center", originX: "center",
   }));
 
+  const applyTextPreset = (preset: CertPreset) => {
+    if (!canvas) return;
+    // Remove existing text + decorative preset lines (keep background rect / borders / images / shapes)
+    const toRemove = canvas.getObjects().filter((o: any) => {
+      if (o.type === "textbox" || o.type === "i-text") return true;
+      if (o._presetDecor) return true;
+      return false;
+    });
+    toRemove.forEach((o) => canvas.remove(o));
+
+    // Optional decorative divider under heading
+    if (preset.decor === "underline") {
+      const line = new Line([250, 175, 550, 175], { stroke: preset.accent, strokeWidth: 2, selectable: false });
+      (line as any)._presetDecor = true;
+      canvas.add(line);
+    } else if (preset.decor === "double-line") {
+      const l1 = new Line([220, 210, 580, 210], { stroke: preset.accent, strokeWidth: 2, selectable: false });
+      const l2 = new Line([260, 218, 540, 218], { stroke: preset.accent, strokeWidth: 1, selectable: false });
+      (l1 as any)._presetDecor = true;
+      (l2 as any)._presetDecor = true;
+      canvas.add(l1);
+      canvas.add(l2);
+    }
+
+    preset.items.forEach((it, idx) => {
+      const isFooter = it.top >= 480;
+      const width = it.width ?? 700;
+      let left = 400;
+      if (isFooter) {
+        // Two-column footer: distribute left/right based on order among footer items
+        const footerIdx = preset.items.filter((p) => p.top >= 480).indexOf(it);
+        left = footerIdx === 0 ? 200 : 600;
+      }
+      const tb = new Textbox(it.text, {
+        left,
+        top: it.top,
+        width,
+        fontSize: it.fontSize,
+        fontFamily: it.fontFamily,
+        fill: it.fill,
+        fontWeight: it.fontWeight ?? "normal",
+        fontStyle: it.fontStyle ?? "normal",
+        textAlign: it.textAlign ?? "center",
+        originX: "center",
+        charSpacing: it.charSpacing ?? 0,
+      });
+      canvas.add(tb);
+
+      // Signature/Date lines for footer fields
+      if (isFooter) {
+        const lineY = it.top - 8;
+        const sigLine = new Line([left - 90, lineY, left + 90, lineY], {
+          stroke: "#9ca3af",
+          strokeWidth: 1,
+          selectable: false,
+        });
+        (sigLine as any)._presetDecor = true;
+        canvas.add(sigLine);
+      }
+    });
+
+    canvas.discardActiveObject();
+    canvas.renderAll();
+    saveHistory(canvas);
+    toast.success(`Applied "${preset.name}" preset`);
+  };
+
   // ---- save / export ----
   const handleSave = async () => {
     if (!canvas) return;
