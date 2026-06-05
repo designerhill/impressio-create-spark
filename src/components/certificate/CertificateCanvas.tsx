@@ -230,6 +230,7 @@ export const CertificateCanvas = () => {
   const [savedPresets, setSavedPresets] = useState<SavedPreset[]>([]);
   const [userKey, setUserKey] = useState<string>("anon");
   const presetStorageKey = `impressio:cert-text-presets:${userKey}`;
+  const [newPresetName, setNewPresetName] = useState("");
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
