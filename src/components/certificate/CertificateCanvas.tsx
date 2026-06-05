@@ -195,7 +195,7 @@ export const CertificateCanvas = () => {
   // UI state
   const [projectTitle, setProjectTitle] = useState("Untitled Certificate");
   const [activeTool, setActiveTool] = useState<
-    "text" | "shapes" | "bg" | "ai" | "upload" | "stickers"
+    "text" | "presets" | "shapes" | "bg" | "ai" | "upload" | "stickers"
   >("text");
   const [zoom, setZoom] = useState(1);
   const [showGrid, setShowGrid] = useState(false);
