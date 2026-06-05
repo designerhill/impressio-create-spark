@@ -274,10 +274,15 @@ export const CertificateCanvas = () => {
   // Apply zoom whenever it changes
   useEffect(() => {
     if (!canvas) return;
-    canvas.setZoom(zoom);
-    canvas.setWidth(800 * zoom);
-    canvas.setHeight(600 * zoom);
-    canvas.renderAll();
+    // Guard against a disposed canvas (HMR / unmount races)
+    if (!(canvas as any).lowerCanvasEl) return;
+    try {
+      canvas.setZoom(zoom);
+      canvas.setDimensions({ width: 800 * zoom, height: 600 * zoom });
+      canvas.renderAll();
+    } catch (e) {
+      // canvas was disposed mid-update; ignore
+    }
   }, [zoom, canvas]);
 
   useEffect(() => {
