@@ -24,7 +24,7 @@ import {
   Undo2, Redo2, AlignLeft, AlignCenter, AlignRight, Bold, Italic, Underline,
   Layers, ChevronUp, ChevronDown, Lock, Unlock, Palette, FlipHorizontal,
   FlipVertical, Share2, ZoomIn, ZoomOut, Grid3x3, Upload as UploadIcon,
-  Smile as SmileIcon, Shapes, PanelLeftClose, FileText,
+  Smile as SmileIcon, Shapes, PanelLeftClose, FileText, LayoutTemplate,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -59,6 +59,124 @@ const GRADIENT_PRESETS = [
 
 const STICKERS = ["🏆", "🥇", "🎖️", "🏅", "⭐", "✨", "📜", "🎓", "🌟", "👑", "💎", "🪄"];
 
+type PresetItem = {
+  text: string;
+  top: number;
+  fontSize: number;
+  fontFamily: string;
+  fill: string;
+  fontWeight?: string | number;
+  fontStyle?: string;
+  textAlign?: "left" | "center" | "right";
+  charSpacing?: number;
+  width?: number;
+};
+
+type CertPreset = {
+  id: string;
+  name: string;
+  description: string;
+  accent: string;
+  items: PresetItem[];
+  decor?: "underline" | "double-line" | "none";
+};
+
+const CERT_PRESETS: CertPreset[] = [
+  {
+    id: "classic-gold",
+    name: "Classic Gold",
+    description: "Traditional serif with gold accents",
+    accent: "#D4AF37",
+    decor: "double-line",
+    items: [
+      { text: "CERTIFICATE", top: 90, fontSize: 56, fontFamily: "Georgia", fill: "#1f2937", fontWeight: "bold", textAlign: "center", charSpacing: 600 },
+      { text: "OF ACHIEVEMENT", top: 160, fontSize: 22, fontFamily: "Georgia", fill: "#6b7280", textAlign: "center", charSpacing: 800 },
+      { text: "This certificate is proudly presented to", top: 230, fontSize: 18, fontFamily: "Georgia", fill: "#374151", fontStyle: "italic", textAlign: "center" },
+      { text: "Recipient Name", top: 280, fontSize: 48, fontFamily: "Brush Script MT", fill: "#1f2937", textAlign: "center" },
+      { text: "For outstanding performance and dedication\nin recognition of exceptional achievement.", top: 370, fontSize: 16, fontFamily: "Georgia", fill: "#4b5563", textAlign: "center" },
+      { text: "Date", top: 500, fontSize: 14, fontFamily: "Georgia", fill: "#6b7280", textAlign: "center", width: 200 },
+      { text: "Signature", top: 500, fontSize: 14, fontFamily: "Georgia", fill: "#6b7280", textAlign: "center", width: 200 },
+    ],
+  },
+  {
+    id: "modern-minimal",
+    name: "Modern Minimal",
+    description: "Clean sans-serif, lots of whitespace",
+    accent: "#111827",
+    decor: "underline",
+    items: [
+      { text: "Certificate of Completion", top: 110, fontSize: 38, fontFamily: "Verdana", fill: "#111827", fontWeight: "bold", textAlign: "center" },
+      { text: "AWARDED TO", top: 220, fontSize: 14, fontFamily: "Verdana", fill: "#9ca3af", textAlign: "center", charSpacing: 400 },
+      { text: "Recipient Name", top: 260, fontSize: 44, fontFamily: "Verdana", fill: "#111827", fontWeight: "bold", textAlign: "center" },
+      { text: "for successfully completing the program with distinction.", top: 360, fontSize: 16, fontFamily: "Verdana", fill: "#4b5563", textAlign: "center" },
+      { text: "DATE", top: 490, fontSize: 12, fontFamily: "Verdana", fill: "#9ca3af", textAlign: "center", width: 200, charSpacing: 200 },
+      { text: "SIGNATURE", top: 490, fontSize: 12, fontFamily: "Verdana", fill: "#9ca3af", textAlign: "center", width: 200, charSpacing: 200 },
+    ],
+  },
+  {
+    id: "elegant-script",
+    name: "Elegant Script",
+    description: "Script headings, romantic feel",
+    accent: "#9b6b3f",
+    decor: "double-line",
+    items: [
+      { text: "Certificate", top: 90, fontSize: 72, fontFamily: "Brush Script MT", fill: "#7c4a1e", textAlign: "center" },
+      { text: "of Excellence", top: 180, fontSize: 26, fontFamily: "Palatino", fill: "#7c4a1e", fontStyle: "italic", textAlign: "center" },
+      { text: "presented to", top: 240, fontSize: 16, fontFamily: "Palatino", fill: "#6b7280", fontStyle: "italic", textAlign: "center" },
+      { text: "Recipient Name", top: 290, fontSize: 42, fontFamily: "Palatino", fill: "#1f2937", fontWeight: "bold", textAlign: "center" },
+      { text: "in heartfelt recognition of remarkable\ndedication and inspiring contribution.", top: 380, fontSize: 16, fontFamily: "Palatino", fill: "#4b5563", fontStyle: "italic", textAlign: "center" },
+      { text: "Date", top: 500, fontSize: 14, fontFamily: "Palatino", fill: "#6b7280", textAlign: "center", width: 200 },
+      { text: "Signature", top: 500, fontSize: 14, fontFamily: "Palatino", fill: "#6b7280", textAlign: "center", width: 200 },
+    ],
+  },
+  {
+    id: "corporate-bold",
+    name: "Corporate Bold",
+    description: "Strong impact heading, professional",
+    accent: "#1e40af",
+    decor: "underline",
+    items: [
+      { text: "CERTIFICATE OF APPRECIATION", top: 100, fontSize: 34, fontFamily: "Impact", fill: "#1e3a8a", textAlign: "center", charSpacing: 200 },
+      { text: "PRESENTED TO", top: 200, fontSize: 14, fontFamily: "Arial", fill: "#1e40af", textAlign: "center", fontWeight: "bold", charSpacing: 400 },
+      { text: "Recipient Name", top: 240, fontSize: 50, fontFamily: "Arial", fill: "#111827", fontWeight: "bold", textAlign: "center" },
+      { text: "In recognition of valuable contributions and exemplary service\nto the organization throughout the year.", top: 340, fontSize: 16, fontFamily: "Arial", fill: "#374151", textAlign: "center" },
+      { text: "Date", top: 500, fontSize: 13, fontFamily: "Arial", fill: "#6b7280", textAlign: "center", width: 200, fontWeight: "bold" },
+      { text: "Authorized Signature", top: 500, fontSize: 13, fontFamily: "Arial", fill: "#6b7280", textAlign: "center", width: 200, fontWeight: "bold" },
+    ],
+  },
+  {
+    id: "academic",
+    name: "Academic Diploma",
+    description: "University-style, formal Latin feel",
+    accent: "#4c1d95",
+    decor: "double-line",
+    items: [
+      { text: "The Institute of Excellence", top: 80, fontSize: 20, fontFamily: "Times New Roman", fill: "#4c1d95", fontStyle: "italic", textAlign: "center" },
+      { text: "Diploma of Honor", top: 130, fontSize: 48, fontFamily: "Times New Roman", fill: "#1f2937", fontWeight: "bold", textAlign: "center" },
+      { text: "Be it known that", top: 220, fontSize: 16, fontFamily: "Times New Roman", fill: "#4b5563", fontStyle: "italic", textAlign: "center" },
+      { text: "Recipient Name", top: 260, fontSize: 40, fontFamily: "Times New Roman", fill: "#1f2937", textAlign: "center" },
+      { text: "having satisfied all requirements is hereby granted this diploma\nwith all rights, honors, and privileges thereto appertaining.", top: 340, fontSize: 16, fontFamily: "Times New Roman", fill: "#4b5563", textAlign: "center" },
+      { text: "Date Conferred", top: 500, fontSize: 13, fontFamily: "Times New Roman", fill: "#6b7280", textAlign: "center", width: 200, fontStyle: "italic" },
+      { text: "Dean's Signature", top: 500, fontSize: 13, fontFamily: "Times New Roman", fill: "#6b7280", textAlign: "center", width: 200, fontStyle: "italic" },
+    ],
+  },
+  {
+    id: "playful",
+    name: "Playful Award",
+    description: "Fun, casual — great for kids & events",
+    accent: "#ec4899",
+    decor: "none",
+    items: [
+      { text: "🌟 Super Star Award 🌟", top: 100, fontSize: 42, fontFamily: "Comic Sans MS", fill: "#db2777", fontWeight: "bold", textAlign: "center" },
+      { text: "goes to", top: 200, fontSize: 22, fontFamily: "Comic Sans MS", fill: "#7c3aed", textAlign: "center" },
+      { text: "Recipient Name", top: 250, fontSize: 48, fontFamily: "Comic Sans MS", fill: "#1f2937", fontWeight: "bold", textAlign: "center" },
+      { text: "for being amazing, working hard, and making\neveryone smile every single day! 🎉", top: 360, fontSize: 18, fontFamily: "Comic Sans MS", fill: "#374151", textAlign: "center" },
+      { text: "Date", top: 500, fontSize: 14, fontFamily: "Comic Sans MS", fill: "#6b7280", textAlign: "center", width: 200 },
+      { text: "Signed", top: 500, fontSize: 14, fontFamily: "Comic Sans MS", fill: "#6b7280", textAlign: "center", width: 200 },
+    ],
+  },
+];
+
 export const CertificateCanvas = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [canvas, setCanvas] = useState<FabricCanvas | null>(null);
@@ -77,7 +195,7 @@ export const CertificateCanvas = () => {
   // UI state
   const [projectTitle, setProjectTitle] = useState("Untitled Certificate");
   const [activeTool, setActiveTool] = useState<
-    "text" | "shapes" | "bg" | "ai" | "upload" | "stickers"
+    "text" | "presets" | "shapes" | "bg" | "ai" | "upload" | "stickers"
   >("text");
   const [zoom, setZoom] = useState(1);
   const [showGrid, setShowGrid] = useState(false);
@@ -419,6 +537,73 @@ export const CertificateCanvas = () => {
     fill: "#374151", textAlign: "center", originX: "center",
   }));
 
+  const applyTextPreset = (preset: CertPreset) => {
+    if (!canvas) return;
+    // Remove existing text + decorative preset lines (keep background rect / borders / images / shapes)
+    const toRemove = canvas.getObjects().filter((o: any) => {
+      if (o.type === "textbox" || o.type === "i-text") return true;
+      if (o._presetDecor) return true;
+      return false;
+    });
+    toRemove.forEach((o) => canvas.remove(o));
+
+    // Optional decorative divider under heading
+    if (preset.decor === "underline") {
+      const line = new Line([250, 175, 550, 175], { stroke: preset.accent, strokeWidth: 2, selectable: false });
+      (line as any)._presetDecor = true;
+      canvas.add(line);
+    } else if (preset.decor === "double-line") {
+      const l1 = new Line([220, 210, 580, 210], { stroke: preset.accent, strokeWidth: 2, selectable: false });
+      const l2 = new Line([260, 218, 540, 218], { stroke: preset.accent, strokeWidth: 1, selectable: false });
+      (l1 as any)._presetDecor = true;
+      (l2 as any)._presetDecor = true;
+      canvas.add(l1);
+      canvas.add(l2);
+    }
+
+    preset.items.forEach((it, idx) => {
+      const isFooter = it.top >= 480;
+      const width = it.width ?? 700;
+      let left = 400;
+      if (isFooter) {
+        // Two-column footer: distribute left/right based on order among footer items
+        const footerIdx = preset.items.filter((p) => p.top >= 480).indexOf(it);
+        left = footerIdx === 0 ? 200 : 600;
+      }
+      const tb = new Textbox(it.text, {
+        left,
+        top: it.top,
+        width,
+        fontSize: it.fontSize,
+        fontFamily: it.fontFamily,
+        fill: it.fill,
+        fontWeight: it.fontWeight ?? "normal",
+        fontStyle: it.fontStyle ?? "normal",
+        textAlign: it.textAlign ?? "center",
+        originX: "center",
+        charSpacing: it.charSpacing ?? 0,
+      });
+      canvas.add(tb);
+
+      // Signature/Date lines for footer fields
+      if (isFooter) {
+        const lineY = it.top - 8;
+        const sigLine = new Line([left - 90, lineY, left + 90, lineY], {
+          stroke: "#9ca3af",
+          strokeWidth: 1,
+          selectable: false,
+        });
+        (sigLine as any)._presetDecor = true;
+        canvas.add(sigLine);
+      }
+    });
+
+    canvas.discardActiveObject();
+    canvas.renderAll();
+    saveHistory(canvas);
+    toast.success(`Applied "${preset.name}" preset`);
+  };
+
   // ---- save / export ----
   const handleSave = async () => {
     if (!canvas) return;
@@ -503,6 +688,7 @@ export const CertificateCanvas = () => {
 
   const tools = [
     { id: "text" as const, icon: Type, label: "Text" },
+    { id: "presets" as const, icon: LayoutTemplate, label: "Presets" },
     { id: "shapes" as const, icon: Shapes, label: "Shapes" },
     { id: "stickers" as const, icon: SmileIcon, label: "Stickers" },
     { id: "bg" as const, icon: Palette, label: "Background" },
@@ -629,6 +815,67 @@ export const CertificateCanvas = () => {
                   <button onClick={addLine} className="aspect-square rounded-lg border border-slate-200 hover:border-violet-400 hover:bg-violet-50 flex items-center justify-center transition">
                     <Minus className="w-6 h-6 text-slate-700" />
                   </button>
+                </div>
+              )}
+
+              {activeTool === "presets" && (
+                <div className="space-y-2">
+                  <p className="text-xs text-slate-500 mb-2">
+                    One-click text layouts with matching fonts. Replaces existing text.
+                  </p>
+                  {CERT_PRESETS.map((p) => {
+                    const heading = p.items[0];
+                    const sub = p.items[1];
+                    return (
+                      <button
+                        key={p.id}
+                        onClick={() => applyTextPreset(p)}
+                        className="w-full text-left rounded-lg border border-slate-200 hover:border-violet-400 hover:bg-violet-50/40 p-3 transition group"
+                      >
+                        <div
+                          className="rounded-md border border-slate-100 bg-white px-3 py-3 mb-2 flex flex-col items-center justify-center min-h-[70px]"
+                          style={{ borderTop: `3px solid ${p.accent}` }}
+                        >
+                          <span
+                            className="truncate max-w-full"
+                            style={{
+                              fontFamily: heading.fontFamily,
+                              fontWeight: heading.fontWeight as any,
+                              fontStyle: heading.fontStyle as any,
+                              color: heading.fill,
+                              fontSize: 18,
+                              letterSpacing: heading.charSpacing ? `${(heading.charSpacing / 1000) * 0.5}em` : undefined,
+                            }}
+                          >
+                            {heading.text}
+                          </span>
+                          {sub && (
+                            <span
+                              className="truncate max-w-full mt-1"
+                              style={{
+                                fontFamily: sub.fontFamily,
+                                fontStyle: sub.fontStyle as any,
+                                color: sub.fill,
+                                fontSize: 11,
+                              }}
+                            >
+                              {sub.text}
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <div className="text-sm font-semibold text-slate-900">{p.name}</div>
+                            <div className="text-[11px] text-slate-500">{p.description}</div>
+                          </div>
+                          <span
+                            className="inline-block w-3 h-3 rounded-full shrink-0"
+                            style={{ background: p.accent }}
+                          />
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
               )}
 
