@@ -25,6 +25,7 @@ import {
   Layers, ChevronUp, ChevronDown, Lock, Unlock, Palette, FlipHorizontal,
   FlipVertical, Share2, ZoomIn, ZoomOut, Grid3x3, Upload as UploadIcon,
   Smile as SmileIcon, Shapes, PanelLeftClose, FileText, LayoutTemplate,
+  Bookmark, Plus,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -200,6 +201,60 @@ export const CertificateCanvas = () => {
   const [zoom, setZoom] = useState(1);
   const [showGrid, setShowGrid] = useState(false);
   const [showLayers, setShowLayers] = useState(true);
+
+  // Custom (user-saved) text presets — stored in localStorage per user
+  type SavedTextItem = {
+    text: string;
+    left: number;
+    top: number;
+    width: number;
+    fontSize: number;
+    fontFamily: string;
+    fill: string;
+    fontWeight: string | number;
+    fontStyle: string;
+    textAlign: "left" | "center" | "right";
+    originX: "left" | "center" | "right";
+    charSpacing: number;
+    underline?: boolean;
+    angle?: number;
+    opacity?: number;
+    lineHeight?: number;
+  };
+  type SavedPreset = {
+    id: string;
+    name: string;
+    createdAt: number;
+    items: SavedTextItem[];
+  };
+  const [savedPresets, setSavedPresets] = useState<SavedPreset[]>([]);
+  const [userKey, setUserKey] = useState<string>("anon");
+  const presetStorageKey = `impressio:cert-text-presets:${userKey}`;
+  const [newPresetName, setNewPresetName] = useState("");
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      setUserKey(data.user?.id || "anon");
+    });
+  }, []);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(presetStorageKey);
+      setSavedPresets(raw ? JSON.parse(raw) : []);
+    } catch {
+      setSavedPresets([]);
+    }
+  }, [presetStorageKey]);
+
+  const persistPresets = (next: SavedPreset[]) => {
+    setSavedPresets(next);
+    try {
+      localStorage.setItem(presetStorageKey, JSON.stringify(next));
+    } catch {
+      toast.error("Couldn't save preset (storage full)");
+    }
+  };
 
   // history (undo/redo)
   const historyRef = useRef<string[]>([]);
@@ -604,6 +659,93 @@ export const CertificateCanvas = () => {
     toast.success(`Applied "${preset.name}" preset`);
   };
 
+  // ---- Custom user presets ----
+  const saveCurrentAsPreset = (name: string) => {
+    if (!canvas) return;
+    const trimmed = name.trim();
+    if (!trimmed) { toast.error("Name your preset first"); return; }
+    const texts = canvas.getObjects().filter(
+      (o) => o.type === "textbox" || o.type === "i-text"
+    );
+    if (!texts.length) {
+      toast.error("Add some text to the canvas first");
+      return;
+    }
+    const items: SavedTextItem[] = texts.map((o: any) => ({
+      text: o.text ?? "",
+      left: o.left ?? 0,
+      top: o.top ?? 0,
+      width: o.width ?? 400,
+      fontSize: o.fontSize ?? 24,
+      fontFamily: o.fontFamily ?? "Arial",
+      fill: typeof o.fill === "string" ? o.fill : "#000000",
+      fontWeight: o.fontWeight ?? "normal",
+      fontStyle: o.fontStyle ?? "normal",
+      textAlign: (o.textAlign as any) ?? "left",
+      originX: (o.originX as any) ?? "left",
+      charSpacing: o.charSpacing ?? 0,
+      underline: !!o.underline,
+      angle: o.angle ?? 0,
+      opacity: o.opacity ?? 1,
+      lineHeight: o.lineHeight ?? 1.16,
+    }));
+    const preset: SavedPreset = {
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      name: trimmed,
+      createdAt: Date.now(),
+      items,
+    };
+    persistPresets([preset, ...savedPresets]);
+    toast.success(`Saved "${trimmed}"`);
+  };
+
+  const applyCustomPreset = (preset: SavedPreset) => {
+    if (!canvas) return;
+    const toRemove = canvas.getObjects().filter((o: any) => {
+      if (o.type === "textbox" || o.type === "i-text") return true;
+      if (o._presetDecor) return true;
+      return false;
+    });
+    toRemove.forEach((o) => canvas.remove(o));
+
+    preset.items.forEach((it) => {
+      const tb = new Textbox(it.text, {
+        left: it.left,
+        top: it.top,
+        width: it.width,
+        fontSize: it.fontSize,
+        fontFamily: it.fontFamily,
+        fill: it.fill,
+        fontWeight: it.fontWeight,
+        fontStyle: it.fontStyle,
+        textAlign: it.textAlign,
+        originX: it.originX,
+        charSpacing: it.charSpacing,
+        underline: it.underline,
+        angle: it.angle,
+        opacity: it.opacity,
+        lineHeight: it.lineHeight,
+      });
+      canvas.add(tb);
+    });
+
+    canvas.discardActiveObject();
+    canvas.renderAll();
+    saveHistory(canvas);
+    toast.success(`Applied "${preset.name}"`);
+  };
+
+  const deleteCustomPreset = (id: string) => {
+    persistPresets(savedPresets.filter((p) => p.id !== id));
+    toast.success("Preset removed");
+  };
+
+  const renameCustomPreset = (id: string, name: string) => {
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    persistPresets(savedPresets.map((p) => (p.id === id ? { ...p, name: trimmed } : p)));
+  };
+
   // ---- save / export ----
   const handleSave = async () => {
     if (!canvas) return;
@@ -820,8 +962,86 @@ export const CertificateCanvas = () => {
 
               {activeTool === "presets" && (
                 <div className="space-y-2">
-                  <p className="text-xs text-slate-500 mb-2">
-                    One-click text layouts with matching fonts. Replaces existing text.
+                  {/* Save current text as a custom preset */}
+                  <div className="rounded-lg border border-violet-200 bg-violet-50/50 p-3 space-y-2">
+                    <div className="flex items-center gap-1.5">
+                      <Bookmark className="w-3.5 h-3.5 text-violet-700" />
+                      <Label className="text-xs font-semibold text-violet-900">My presets</Label>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <Input
+                        value={newPresetName}
+                        onChange={(e) => setNewPresetName(e.target.value)}
+                        placeholder="Preset name…"
+                        className="h-8 text-xs"
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            saveCurrentAsPreset(newPresetName);
+                            setNewPresetName("");
+                          }
+                        }}
+                      />
+                      <Button
+                        size="sm"
+                        className="h-8 bg-violet-600 hover:bg-violet-700 text-white px-2"
+                        onClick={() => {
+                          saveCurrentAsPreset(newPresetName);
+                          setNewPresetName("");
+                        }}
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                      </Button>
+                    </div>
+                    <p className="text-[11px] text-slate-500 leading-snug">
+                      Captures every text element's font, color, size, position & spacing.
+                    </p>
+
+                    {savedPresets.length > 0 ? (
+                      <div className="space-y-1.5 pt-1">
+                        {savedPresets.map((sp) => (
+                          <div
+                            key={sp.id}
+                            className="group flex items-center gap-1 rounded-md border border-slate-200 bg-white px-2 py-1.5"
+                          >
+                            <button
+                              onClick={() => applyCustomPreset(sp)}
+                              className="flex-1 min-w-0 text-left"
+                              title="Apply this preset"
+                            >
+                              <div className="text-xs font-medium text-slate-900 truncate">{sp.name}</div>
+                              <div className="text-[10px] text-slate-500">
+                                {sp.items.length} element{sp.items.length === 1 ? "" : "s"}
+                              </div>
+                            </button>
+                            <button
+                              onClick={() => {
+                                const n = window.prompt("Rename preset", sp.name);
+                                if (n) renameCustomPreset(sp.id, n);
+                              }}
+                              className="opacity-0 group-hover:opacity-100 transition text-[10px] text-slate-500 hover:text-slate-900 px-1"
+                              title="Rename"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => deleteCustomPreset(sp.id)}
+                              className="opacity-0 group-hover:opacity-100 transition text-slate-400 hover:text-red-600 p-1"
+                              title="Delete"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-[11px] text-slate-400 italic pt-1">
+                        No saved presets yet.
+                      </p>
+                    )}
+                  </div>
+
+                  <p className="text-xs text-slate-500 pt-2 pb-1">
+                    Built-in layouts — replaces existing text.
                   </p>
                   {CERT_PRESETS.map((p) => {
                     const heading = p.items[0];
