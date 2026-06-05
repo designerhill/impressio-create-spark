@@ -962,8 +962,86 @@ export const CertificateCanvas = () => {
 
               {activeTool === "presets" && (
                 <div className="space-y-2">
-                  <p className="text-xs text-slate-500 mb-2">
-                    One-click text layouts with matching fonts. Replaces existing text.
+                  {/* Save current text as a custom preset */}
+                  <div className="rounded-lg border border-violet-200 bg-violet-50/50 p-3 space-y-2">
+                    <div className="flex items-center gap-1.5">
+                      <Bookmark className="w-3.5 h-3.5 text-violet-700" />
+                      <Label className="text-xs font-semibold text-violet-900">My presets</Label>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <Input
+                        value={newPresetName}
+                        onChange={(e) => setNewPresetName(e.target.value)}
+                        placeholder="Preset name…"
+                        className="h-8 text-xs"
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            saveCurrentAsPreset(newPresetName);
+                            setNewPresetName("");
+                          }
+                        }}
+                      />
+                      <Button
+                        size="sm"
+                        className="h-8 bg-violet-600 hover:bg-violet-700 text-white px-2"
+                        onClick={() => {
+                          saveCurrentAsPreset(newPresetName);
+                          setNewPresetName("");
+                        }}
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                      </Button>
+                    </div>
+                    <p className="text-[11px] text-slate-500 leading-snug">
+                      Captures every text element's font, color, size, position & spacing.
+                    </p>
+
+                    {savedPresets.length > 0 ? (
+                      <div className="space-y-1.5 pt-1">
+                        {savedPresets.map((sp) => (
+                          <div
+                            key={sp.id}
+                            className="group flex items-center gap-1 rounded-md border border-slate-200 bg-white px-2 py-1.5"
+                          >
+                            <button
+                              onClick={() => applyCustomPreset(sp)}
+                              className="flex-1 min-w-0 text-left"
+                              title="Apply this preset"
+                            >
+                              <div className="text-xs font-medium text-slate-900 truncate">{sp.name}</div>
+                              <div className="text-[10px] text-slate-500">
+                                {sp.items.length} element{sp.items.length === 1 ? "" : "s"}
+                              </div>
+                            </button>
+                            <button
+                              onClick={() => {
+                                const n = window.prompt("Rename preset", sp.name);
+                                if (n) renameCustomPreset(sp.id, n);
+                              }}
+                              className="opacity-0 group-hover:opacity-100 transition text-[10px] text-slate-500 hover:text-slate-900 px-1"
+                              title="Rename"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => deleteCustomPreset(sp.id)}
+                              className="opacity-0 group-hover:opacity-100 transition text-slate-400 hover:text-red-600 p-1"
+                              title="Delete"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-[11px] text-slate-400 italic pt-1">
+                        No saved presets yet.
+                      </p>
+                    )}
+                  </div>
+
+                  <p className="text-xs text-slate-500 pt-2 pb-1">
+                    Built-in layouts — replaces existing text.
                   </p>
                   {CERT_PRESETS.map((p) => {
                     const heading = p.items[0];
