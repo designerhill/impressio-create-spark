@@ -186,11 +186,59 @@ export const CardCanvas = () => {
   // UI state
   const [projectTitle, setProjectTitle] = useState("Untitled Card");
   const [activeTool, setActiveTool] = useState<
-    "text" | "shapes" | "bg" | "ai" | "upload" | "stickers"
+    "text" | "presets" | "shapes" | "bg" | "ai" | "upload" | "stickers"
   >("text");
   const [zoom, setZoom] = useState(1);
   const [showGrid, setShowGrid] = useState(false);
   const [showLayers, setShowLayers] = useState(true);
+
+  // Custom (user-saved) text presets — stored in localStorage per user
+  type SavedTextItem = {
+    text: string;
+    left: number;
+    top: number;
+    width: number;
+    fontSize: number;
+    fontFamily: string;
+    fill: string;
+    fontWeight: string | number;
+    fontStyle: string;
+    textAlign: "left" | "center" | "right";
+    originX: "left" | "center" | "right";
+    charSpacing: number;
+    underline?: boolean;
+    angle?: number;
+    opacity?: number;
+    lineHeight?: number;
+  };
+  type SavedPreset = {
+    id: string;
+    name: string;
+    createdAt: number;
+    items: SavedTextItem[];
+  };
+  const [savedPresets, setSavedPresets] = useState<SavedPreset[]>([]);
+  const userKey = user?.id || "anon";
+  const presetStorageKey = `impressio:card-text-presets:${userKey}`;
+  const [newPresetName, setNewPresetName] = useState("");
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(presetStorageKey);
+      setSavedPresets(raw ? JSON.parse(raw) : []);
+    } catch {
+      setSavedPresets([]);
+    }
+  }, [presetStorageKey]);
+
+  const persistPresets = (next: SavedPreset[]) => {
+    setSavedPresets(next);
+    try {
+      localStorage.setItem(presetStorageKey, JSON.stringify(next));
+    } catch {
+      toast.error("Couldn't save preset (storage full)");
+    }
+  };
 
   // autosave
   const designIdRef = useRef<string | null>(searchParams.get("designId"));
