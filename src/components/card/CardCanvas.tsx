@@ -216,6 +216,7 @@ export const CardCanvas = () => {
     name: string;
     createdAt: number;
     items: SavedTextItem[];
+    thumbnail?: string;
   };
   const [savedPresets, setSavedPresets] = useState<SavedPreset[]>([]);
   const userKey = user?.id || "anon";
@@ -337,10 +338,14 @@ export const CardCanvas = () => {
   // Apply zoom whenever it changes
   useEffect(() => {
     if (!canvas) return;
-    canvas.setZoom(zoom);
-    canvas.setWidth(600 * zoom);
-    canvas.setHeight(400 * zoom);
-    canvas.renderAll();
+    if (!(canvas as any).lowerCanvasEl) return;
+    try {
+      canvas.setZoom(zoom);
+      canvas.setDimensions({ width: 600 * zoom, height: 400 * zoom });
+      canvas.renderAll();
+    } catch {
+      // canvas was disposed mid-update; ignore
+    }
   }, [zoom, canvas]);
 
   useEffect(() => {
@@ -762,6 +767,18 @@ export const CardCanvas = () => {
       name: trimmed,
       createdAt: Date.now(),
       items,
+      thumbnail: (() => {
+        try {
+          canvas.discardActiveObject();
+          canvas.renderAll();
+          return canvas.toDataURL({
+            format: "png",
+            multiplier: 0.3 / (zoom || 1),
+          });
+        } catch {
+          return undefined;
+        }
+      })(),
     };
     persistPresets([preset, ...savedPresets]);
     setNewPresetName("");
@@ -1043,14 +1060,30 @@ export const CardCanvas = () => {
                         {savedPresets.map((p) => (
                           <li
                             key={p.id}
-                            className="group flex items-center gap-1 rounded-md border border-slate-200 hover:border-violet-300 px-2 py-1.5"
+                            className="group flex items-center gap-2 rounded-md border border-slate-200 hover:border-violet-300 p-1.5"
                           >
                             <button
                               onClick={() => applyCustomPreset(p)}
-                              className="flex-1 text-left min-w-0"
+                              className="flex items-center gap-2 flex-1 text-left min-w-0"
                             >
-                              <div className="text-xs font-medium text-slate-800 truncate">{p.name}</div>
-                              <div className="text-[10px] text-slate-500">{p.items.length} element{p.items.length === 1 ? "" : "s"}</div>
+                              {p.thumbnail ? (
+                                <img
+                                  src={p.thumbnail}
+                                  alt={p.name}
+                                  className="w-14 h-10 object-cover rounded border border-slate-200 shrink-0 bg-white"
+                                  loading="lazy"
+                                />
+                              ) : (
+                                <div className="w-14 h-10 rounded border border-dashed border-slate-200 bg-slate-50 grid place-items-center shrink-0">
+                                  <LayoutTemplate className="w-4 h-4 text-slate-400" />
+                                </div>
+                              )}
+                              <div className="min-w-0 flex-1">
+                                <div className="text-xs font-medium text-slate-800 truncate">{p.name}</div>
+                                <div className="text-[10px] text-slate-500">
+                                  {p.items.length} element{p.items.length === 1 ? "" : "s"}
+                                </div>
+                              </div>
                             </button>
                             <button
                               onClick={() => {

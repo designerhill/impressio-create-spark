@@ -226,6 +226,7 @@ export const CertificateCanvas = () => {
     name: string;
     createdAt: number;
     items: SavedTextItem[];
+    thumbnail?: string;
   };
   const [savedPresets, setSavedPresets] = useState<SavedPreset[]>([]);
   const [userKey, setUserKey] = useState<string>("anon");
@@ -699,6 +700,18 @@ export const CertificateCanvas = () => {
       name: trimmed,
       createdAt: Date.now(),
       items,
+      thumbnail: (() => {
+        try {
+          canvas.discardActiveObject();
+          canvas.renderAll();
+          return canvas.toDataURL({
+            format: "png",
+            multiplier: 0.22 / ((canvas.getZoom && canvas.getZoom()) || 1),
+          });
+        } catch {
+          return undefined;
+        }
+      })(),
     };
     persistPresets([preset, ...savedPresets]);
     toast.success(`Saved "${trimmed}"`);
@@ -1006,16 +1019,30 @@ export const CertificateCanvas = () => {
                         {savedPresets.map((sp) => (
                           <div
                             key={sp.id}
-                            className="group flex items-center gap-1 rounded-md border border-slate-200 bg-white px-2 py-1.5"
+                            className="group flex items-center gap-2 rounded-md border border-slate-200 bg-white p-1.5"
                           >
                             <button
                               onClick={() => applyCustomPreset(sp)}
-                              className="flex-1 min-w-0 text-left"
+                              className="flex items-center gap-2 flex-1 min-w-0 text-left"
                               title="Apply this preset"
                             >
-                              <div className="text-xs font-medium text-slate-900 truncate">{sp.name}</div>
-                              <div className="text-[10px] text-slate-500">
-                                {sp.items.length} element{sp.items.length === 1 ? "" : "s"}
+                              {sp.thumbnail ? (
+                                <img
+                                  src={sp.thumbnail}
+                                  alt={sp.name}
+                                  className="w-16 h-12 object-cover rounded border border-slate-200 shrink-0 bg-white"
+                                  loading="lazy"
+                                />
+                              ) : (
+                                <div className="w-16 h-12 rounded border border-dashed border-slate-200 bg-slate-50 grid place-items-center shrink-0">
+                                  <LayoutTemplate className="w-4 h-4 text-slate-400" />
+                                </div>
+                              )}
+                              <div className="min-w-0 flex-1">
+                                <div className="text-xs font-medium text-slate-900 truncate">{sp.name}</div>
+                                <div className="text-[10px] text-slate-500">
+                                  {sp.items.length} element{sp.items.length === 1 ? "" : "s"}
+                                </div>
                               </div>
                             </button>
                             <button
