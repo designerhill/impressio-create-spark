@@ -28,7 +28,7 @@ import {
   Layers, ChevronUp, ChevronDown, Lock, Unlock, Palette, FlipHorizontal,
   FlipVertical, Cloud, CloudOff, Loader2, CheckCircle2,
   Share2, ZoomIn, ZoomOut, Grid3x3, Upload as UploadIcon, Smile as SmileIcon,
-  Shapes, PanelLeftClose,
+  Shapes, PanelLeftClose, LayoutTemplate, Bookmark, Plus,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -62,6 +62,110 @@ const GRADIENT_PRESETS = [
 ];
 
 const STICKERS = ["⭐", "❤️", "🎉", "🎂", "🎁", "✨", "🌸", "🎈", "🏆", "💐", "🥂", "🌟"];
+
+type PresetItem = {
+  text: string;
+  top: number;
+  fontSize: number;
+  fontFamily: string;
+  fill: string;
+  fontWeight?: string | number;
+  fontStyle?: string;
+  textAlign?: "left" | "center" | "right";
+  charSpacing?: number;
+  width?: number;
+};
+
+type CardPreset = {
+  id: string;
+  name: string;
+  description: string;
+  accent: string;
+  items: PresetItem[];
+  decor?: "underline" | "double-line" | "none";
+};
+
+// Canvas is 600 × 400. Use centered originX.
+const CARD_PRESETS: CardPreset[] = [
+  {
+    id: "birthday-bash",
+    name: "Birthday Bash",
+    description: "Fun, bold birthday wishes",
+    accent: "#ec4899",
+    decor: "none",
+    items: [
+      { text: "🎉 Happy Birthday 🎉", top: 60, fontSize: 38, fontFamily: "Comic Sans MS", fill: "#db2777", fontWeight: "bold", textAlign: "center" },
+      { text: "to someone special", top: 130, fontSize: 18, fontFamily: "Comic Sans MS", fill: "#7c3aed", fontStyle: "italic", textAlign: "center" },
+      { text: "Recipient Name", top: 180, fontSize: 34, fontFamily: "Comic Sans MS", fill: "#1f2937", fontWeight: "bold", textAlign: "center" },
+      { text: "Wishing you a day filled with laughter,\nlove, and lots of cake!", top: 250, fontSize: 16, fontFamily: "Comic Sans MS", fill: "#374151", textAlign: "center" },
+    ],
+  },
+  {
+    id: "elegant-anniversary",
+    name: "Elegant Anniversary",
+    description: "Romantic script for couples",
+    accent: "#9b6b3f",
+    decor: "double-line",
+    items: [
+      { text: "Happy Anniversary", top: 50, fontSize: 44, fontFamily: "Brush Script MT", fill: "#7c4a1e", textAlign: "center" },
+      { text: "celebrating you", top: 140, fontSize: 16, fontFamily: "Palatino", fill: "#6b7280", fontStyle: "italic", textAlign: "center" },
+      { text: "Recipient Name", top: 180, fontSize: 30, fontFamily: "Palatino", fill: "#1f2937", fontWeight: "bold", textAlign: "center" },
+      { text: "Another year of love, laughter, and\nbeautiful memories together.", top: 250, fontSize: 15, fontFamily: "Palatino", fill: "#4b5563", fontStyle: "italic", textAlign: "center" },
+    ],
+  },
+  {
+    id: "modern-thanks",
+    name: "Modern Thank You",
+    description: "Clean sans-serif gratitude",
+    accent: "#111827",
+    decor: "underline",
+    items: [
+      { text: "THANK YOU", top: 80, fontSize: 48, fontFamily: "Verdana", fill: "#111827", fontWeight: "bold", textAlign: "center", charSpacing: 400 },
+      { text: "to", top: 170, fontSize: 14, fontFamily: "Verdana", fill: "#9ca3af", textAlign: "center", charSpacing: 200 },
+      { text: "Recipient Name", top: 200, fontSize: 28, fontFamily: "Verdana", fill: "#111827", fontWeight: "bold", textAlign: "center" },
+      { text: "for your kindness, support, and generosity.\nIt truly means the world.", top: 270, fontSize: 14, fontFamily: "Verdana", fill: "#4b5563", textAlign: "center" },
+    ],
+  },
+  {
+    id: "congrats-bold",
+    name: "Congrats Bold",
+    description: "Strong, celebratory impact",
+    accent: "#1e40af",
+    decor: "underline",
+    items: [
+      { text: "CONGRATULATIONS!", top: 70, fontSize: 36, fontFamily: "Impact", fill: "#1e3a8a", textAlign: "center", charSpacing: 200 },
+      { text: "WAY TO GO", top: 150, fontSize: 13, fontFamily: "Arial", fill: "#1e40af", textAlign: "center", fontWeight: "bold", charSpacing: 400 },
+      { text: "Recipient Name", top: 185, fontSize: 36, fontFamily: "Arial", fill: "#111827", fontWeight: "bold", textAlign: "center" },
+      { text: "You did it! So proud of everything\nyou've accomplished.", top: 260, fontSize: 15, fontFamily: "Arial", fill: "#374151", textAlign: "center" },
+    ],
+  },
+  {
+    id: "holiday-warmth",
+    name: "Holiday Warmth",
+    description: "Cozy, classic season's greetings",
+    accent: "#b91c1c",
+    decor: "double-line",
+    items: [
+      { text: "Season's Greetings", top: 60, fontSize: 40, fontFamily: "Georgia", fill: "#7f1d1d", fontStyle: "italic", textAlign: "center" },
+      { text: "warm wishes for", top: 150, fontSize: 16, fontFamily: "Georgia", fill: "#6b7280", textAlign: "center" },
+      { text: "Recipient Name", top: 190, fontSize: 30, fontFamily: "Georgia", fill: "#1f2937", fontWeight: "bold", textAlign: "center" },
+      { text: "May your holidays be filled with joy,\npeace, and the company of loved ones.", top: 260, fontSize: 15, fontFamily: "Georgia", fill: "#4b5563", textAlign: "center" },
+    ],
+  },
+  {
+    id: "baby-soft",
+    name: "Baby Soft",
+    description: "Sweet, gentle new baby card",
+    accent: "#f472b6",
+    decor: "none",
+    items: [
+      { text: "👶 Welcome, Little One 👶", top: 70, fontSize: 28, fontFamily: "Palatino", fill: "#be185d", fontStyle: "italic", textAlign: "center" },
+      { text: "congratulations to", top: 140, fontSize: 14, fontFamily: "Palatino", fill: "#9ca3af", textAlign: "center" },
+      { text: "The Family", top: 175, fontSize: 30, fontFamily: "Brush Script MT", fill: "#1f2937", textAlign: "center" },
+      { text: "Wishing you endless cuddles, sleep-filled nights,\nand the sweetest of memories.", top: 250, fontSize: 14, fontFamily: "Palatino", fill: "#4b5563", fontStyle: "italic", textAlign: "center" },
+    ],
+  },
+];
 
 export const CardCanvas = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
