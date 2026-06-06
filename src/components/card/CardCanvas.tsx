@@ -1007,6 +1007,99 @@ export const CardCanvas = () => {
                 </div>
               )}
 
+              {activeTool === "presets" && (
+                <div className="space-y-4">
+                  {/* My presets */}
+                  <div>
+                    <div className="flex items-center gap-1.5 mb-2">
+                      <Bookmark className="w-3.5 h-3.5 text-slate-500" />
+                      <Label className="text-xs text-slate-600">My presets</Label>
+                    </div>
+                    <div className="flex gap-1.5 mb-2">
+                      <Input
+                        value={newPresetName}
+                        onChange={(e) => setNewPresetName(e.target.value)}
+                        placeholder="Preset name"
+                        className="h-8 text-xs"
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") saveCurrentAsPreset(newPresetName);
+                        }}
+                      />
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-8 shrink-0"
+                        onClick={() => saveCurrentAsPreset(newPresetName)}
+                      >
+                        <Plus className="w-3.5 h-3.5 mr-1" /> Save
+                      </Button>
+                    </div>
+                    {savedPresets.length === 0 ? (
+                      <div className="text-[11px] text-slate-500 px-1 py-2">
+                        Save your current text layout to reuse it later.
+                      </div>
+                    ) : (
+                      <ul className="space-y-1.5">
+                        {savedPresets.map((p) => (
+                          <li
+                            key={p.id}
+                            className="group flex items-center gap-1 rounded-md border border-slate-200 hover:border-violet-300 px-2 py-1.5"
+                          >
+                            <button
+                              onClick={() => applyCustomPreset(p)}
+                              className="flex-1 text-left min-w-0"
+                            >
+                              <div className="text-xs font-medium text-slate-800 truncate">{p.name}</div>
+                              <div className="text-[10px] text-slate-500">{p.items.length} element{p.items.length === 1 ? "" : "s"}</div>
+                            </button>
+                            <button
+                              onClick={() => {
+                                const next = prompt("Rename preset", p.name);
+                                if (next) renameCustomPreset(p.id, next);
+                              }}
+                              className="opacity-0 group-hover:opacity-100 text-[10px] text-slate-500 hover:text-violet-700 px-1"
+                            >
+                              Rename
+                            </button>
+                            <button
+                              onClick={() => deleteCustomPreset(p.id)}
+                              className="opacity-0 group-hover:opacity-100 text-rose-500 hover:text-rose-600 p-1"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+
+                  <Separator />
+
+                  {/* Built-in presets */}
+                  <div>
+                    <Label className="text-xs text-slate-600 mb-2 block">Layouts</Label>
+                    <div className="space-y-2">
+                      {CARD_PRESETS.map((p) => (
+                        <button
+                          key={p.id}
+                          onClick={() => applyTextPreset(p)}
+                          className="w-full text-left rounded-md border border-slate-200 hover:border-violet-400 hover:bg-violet-50 transition px-3 py-2.5"
+                        >
+                          <div className="flex items-center gap-2">
+                            <span
+                              className="w-2.5 h-2.5 rounded-full shrink-0"
+                              style={{ background: p.accent }}
+                            />
+                            <span className="text-sm font-medium text-slate-800">{p.name}</span>
+                          </div>
+                          <div className="text-[11px] text-slate-500 mt-0.5 pl-4.5">{p.description}</div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {activeTool === "stickers" && (
                 <div className="grid grid-cols-5 gap-2">
                   {STICKERS.map((s) => (
