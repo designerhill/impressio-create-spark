@@ -767,6 +767,18 @@ export const CardCanvas = () => {
       name: trimmed,
       createdAt: Date.now(),
       items,
+      thumbnail: (() => {
+        try {
+          canvas.discardActiveObject();
+          canvas.renderAll();
+          return canvas.toDataURL({
+            format: "png",
+            multiplier: 0.3 / (zoom || 1),
+          });
+        } catch {
+          return undefined;
+        }
+      })(),
     };
     persistPresets([preset, ...savedPresets]);
     setNewPresetName("");
