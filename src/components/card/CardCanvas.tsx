@@ -681,6 +681,140 @@ export const CardCanvas = () => {
     fill: "#374151", textAlign: "center", originX: "center",
   }));
 
+  // ---- Built-in card text presets ----
+  const applyTextPreset = (preset: CardPreset) => {
+    if (!canvas) return;
+    const toRemove = canvas.getObjects().filter((o: any) => {
+      if (o.type === "textbox" || o.type === "i-text") return true;
+      if (o._presetDecor) return true;
+      return false;
+    });
+    toRemove.forEach((o) => canvas.remove(o));
+
+    if (preset.decor === "underline") {
+      const line = new Line([200, 130, 400, 130], { stroke: preset.accent, strokeWidth: 2, selectable: false });
+      (line as any)._presetDecor = true;
+      canvas.add(line);
+    } else if (preset.decor === "double-line") {
+      const l1 = new Line([180, 130, 420, 130], { stroke: preset.accent, strokeWidth: 2, selectable: false });
+      const l2 = new Line([210, 137, 390, 137], { stroke: preset.accent, strokeWidth: 1, selectable: false });
+      (l1 as any)._presetDecor = true;
+      (l2 as any)._presetDecor = true;
+      canvas.add(l1);
+      canvas.add(l2);
+    }
+
+    preset.items.forEach((it) => {
+      const tb = new Textbox(it.text, {
+        left: 300,
+        top: it.top,
+        width: it.width ?? 540,
+        fontSize: it.fontSize,
+        fontFamily: it.fontFamily,
+        fill: it.fill,
+        fontWeight: it.fontWeight ?? "normal",
+        fontStyle: it.fontStyle ?? "normal",
+        textAlign: it.textAlign ?? "center",
+        originX: "center",
+        charSpacing: it.charSpacing ?? 0,
+      });
+      canvas.add(tb);
+    });
+
+    canvas.discardActiveObject();
+    canvas.renderAll();
+    saveHistory(canvas);
+    toast.success(`Applied "${preset.name}" preset`);
+  };
+
+  // ---- Custom user presets ----
+  const saveCurrentAsPreset = (name: string) => {
+    if (!canvas) return;
+    const trimmed = name.trim();
+    if (!trimmed) { toast.error("Name your preset first"); return; }
+    const texts = canvas.getObjects().filter(
+      (o) => o.type === "textbox" || o.type === "i-text"
+    );
+    if (!texts.length) {
+      toast.error("Add some text to the card first");
+      return;
+    }
+    const items: SavedTextItem[] = texts.map((o: any) => ({
+      text: o.text ?? "",
+      left: o.left ?? 0,
+      top: o.top ?? 0,
+      width: o.width ?? 400,
+      fontSize: o.fontSize ?? 24,
+      fontFamily: o.fontFamily ?? "Arial",
+      fill: typeof o.fill === "string" ? o.fill : "#000000",
+      fontWeight: o.fontWeight ?? "normal",
+      fontStyle: o.fontStyle ?? "normal",
+      textAlign: (o.textAlign as any) ?? "left",
+      originX: (o.originX as any) ?? "left",
+      charSpacing: o.charSpacing ?? 0,
+      underline: !!o.underline,
+      angle: o.angle ?? 0,
+      opacity: o.opacity ?? 1,
+      lineHeight: o.lineHeight ?? 1.16,
+    }));
+    const preset: SavedPreset = {
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      name: trimmed,
+      createdAt: Date.now(),
+      items,
+    };
+    persistPresets([preset, ...savedPresets]);
+    setNewPresetName("");
+    toast.success(`Saved "${trimmed}"`);
+  };
+
+  const applyCustomPreset = (preset: SavedPreset) => {
+    if (!canvas) return;
+    const toRemove = canvas.getObjects().filter((o: any) => {
+      if (o.type === "textbox" || o.type === "i-text") return true;
+      if (o._presetDecor) return true;
+      return false;
+    });
+    toRemove.forEach((o) => canvas.remove(o));
+
+    preset.items.forEach((it) => {
+      const tb = new Textbox(it.text, {
+        left: it.left,
+        top: it.top,
+        width: it.width,
+        fontSize: it.fontSize,
+        fontFamily: it.fontFamily,
+        fill: it.fill,
+        fontWeight: it.fontWeight,
+        fontStyle: it.fontStyle,
+        textAlign: it.textAlign,
+        originX: it.originX,
+        charSpacing: it.charSpacing,
+        underline: it.underline,
+        angle: it.angle,
+        opacity: it.opacity,
+        lineHeight: it.lineHeight,
+      });
+      canvas.add(tb);
+    });
+
+    canvas.discardActiveObject();
+    canvas.renderAll();
+    saveHistory(canvas);
+    toast.success(`Applied "${preset.name}"`);
+  };
+
+  const deleteCustomPreset = (id: string) => {
+    persistPresets(savedPresets.filter((p) => p.id !== id));
+    toast.success("Preset removed");
+  };
+
+  const renameCustomPreset = (id: string, name: string) => {
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    persistPresets(savedPresets.map((p) => (p.id === id ? { ...p, name: trimmed } : p)));
+  };
+
   const handleSave = async () => {
     if (!canvas) return;
     if (!user) {
