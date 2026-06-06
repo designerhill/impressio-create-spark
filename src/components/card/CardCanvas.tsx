@@ -337,10 +337,14 @@ export const CardCanvas = () => {
   // Apply zoom whenever it changes
   useEffect(() => {
     if (!canvas) return;
-    canvas.setZoom(zoom);
-    canvas.setWidth(600 * zoom);
-    canvas.setHeight(400 * zoom);
-    canvas.renderAll();
+    if (!(canvas as any).lowerCanvasEl) return;
+    try {
+      canvas.setZoom(zoom);
+      canvas.setDimensions({ width: 600 * zoom, height: 400 * zoom });
+      canvas.renderAll();
+    } catch {
+      // canvas was disposed mid-update; ignore
+    }
   }, [zoom, canvas]);
 
   useEffect(() => {
