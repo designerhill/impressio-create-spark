@@ -28,7 +28,7 @@ import {
   Layers, ChevronUp, ChevronDown, Lock, Unlock, Palette, FlipHorizontal,
   FlipVertical, Cloud, CloudOff, Loader2, CheckCircle2,
   Share2, ZoomIn, ZoomOut, Grid3x3, Upload as UploadIcon, Smile as SmileIcon,
-  Shapes, PanelLeftClose,
+  Shapes, PanelLeftClose, LayoutTemplate, Bookmark, Plus,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -63,6 +63,110 @@ const GRADIENT_PRESETS = [
 
 const STICKERS = ["⭐", "❤️", "🎉", "🎂", "🎁", "✨", "🌸", "🎈", "🏆", "💐", "🥂", "🌟"];
 
+type PresetItem = {
+  text: string;
+  top: number;
+  fontSize: number;
+  fontFamily: string;
+  fill: string;
+  fontWeight?: string | number;
+  fontStyle?: string;
+  textAlign?: "left" | "center" | "right";
+  charSpacing?: number;
+  width?: number;
+};
+
+type CardPreset = {
+  id: string;
+  name: string;
+  description: string;
+  accent: string;
+  items: PresetItem[];
+  decor?: "underline" | "double-line" | "none";
+};
+
+// Canvas is 600 × 400. Use centered originX.
+const CARD_PRESETS: CardPreset[] = [
+  {
+    id: "birthday-bash",
+    name: "Birthday Bash",
+    description: "Fun, bold birthday wishes",
+    accent: "#ec4899",
+    decor: "none",
+    items: [
+      { text: "🎉 Happy Birthday 🎉", top: 60, fontSize: 38, fontFamily: "Comic Sans MS", fill: "#db2777", fontWeight: "bold", textAlign: "center" },
+      { text: "to someone special", top: 130, fontSize: 18, fontFamily: "Comic Sans MS", fill: "#7c3aed", fontStyle: "italic", textAlign: "center" },
+      { text: "Recipient Name", top: 180, fontSize: 34, fontFamily: "Comic Sans MS", fill: "#1f2937", fontWeight: "bold", textAlign: "center" },
+      { text: "Wishing you a day filled with laughter,\nlove, and lots of cake!", top: 250, fontSize: 16, fontFamily: "Comic Sans MS", fill: "#374151", textAlign: "center" },
+    ],
+  },
+  {
+    id: "elegant-anniversary",
+    name: "Elegant Anniversary",
+    description: "Romantic script for couples",
+    accent: "#9b6b3f",
+    decor: "double-line",
+    items: [
+      { text: "Happy Anniversary", top: 50, fontSize: 44, fontFamily: "Brush Script MT", fill: "#7c4a1e", textAlign: "center" },
+      { text: "celebrating you", top: 140, fontSize: 16, fontFamily: "Palatino", fill: "#6b7280", fontStyle: "italic", textAlign: "center" },
+      { text: "Recipient Name", top: 180, fontSize: 30, fontFamily: "Palatino", fill: "#1f2937", fontWeight: "bold", textAlign: "center" },
+      { text: "Another year of love, laughter, and\nbeautiful memories together.", top: 250, fontSize: 15, fontFamily: "Palatino", fill: "#4b5563", fontStyle: "italic", textAlign: "center" },
+    ],
+  },
+  {
+    id: "modern-thanks",
+    name: "Modern Thank You",
+    description: "Clean sans-serif gratitude",
+    accent: "#111827",
+    decor: "underline",
+    items: [
+      { text: "THANK YOU", top: 80, fontSize: 48, fontFamily: "Verdana", fill: "#111827", fontWeight: "bold", textAlign: "center", charSpacing: 400 },
+      { text: "to", top: 170, fontSize: 14, fontFamily: "Verdana", fill: "#9ca3af", textAlign: "center", charSpacing: 200 },
+      { text: "Recipient Name", top: 200, fontSize: 28, fontFamily: "Verdana", fill: "#111827", fontWeight: "bold", textAlign: "center" },
+      { text: "for your kindness, support, and generosity.\nIt truly means the world.", top: 270, fontSize: 14, fontFamily: "Verdana", fill: "#4b5563", textAlign: "center" },
+    ],
+  },
+  {
+    id: "congrats-bold",
+    name: "Congrats Bold",
+    description: "Strong, celebratory impact",
+    accent: "#1e40af",
+    decor: "underline",
+    items: [
+      { text: "CONGRATULATIONS!", top: 70, fontSize: 36, fontFamily: "Impact", fill: "#1e3a8a", textAlign: "center", charSpacing: 200 },
+      { text: "WAY TO GO", top: 150, fontSize: 13, fontFamily: "Arial", fill: "#1e40af", textAlign: "center", fontWeight: "bold", charSpacing: 400 },
+      { text: "Recipient Name", top: 185, fontSize: 36, fontFamily: "Arial", fill: "#111827", fontWeight: "bold", textAlign: "center" },
+      { text: "You did it! So proud of everything\nyou've accomplished.", top: 260, fontSize: 15, fontFamily: "Arial", fill: "#374151", textAlign: "center" },
+    ],
+  },
+  {
+    id: "holiday-warmth",
+    name: "Holiday Warmth",
+    description: "Cozy, classic season's greetings",
+    accent: "#b91c1c",
+    decor: "double-line",
+    items: [
+      { text: "Season's Greetings", top: 60, fontSize: 40, fontFamily: "Georgia", fill: "#7f1d1d", fontStyle: "italic", textAlign: "center" },
+      { text: "warm wishes for", top: 150, fontSize: 16, fontFamily: "Georgia", fill: "#6b7280", textAlign: "center" },
+      { text: "Recipient Name", top: 190, fontSize: 30, fontFamily: "Georgia", fill: "#1f2937", fontWeight: "bold", textAlign: "center" },
+      { text: "May your holidays be filled with joy,\npeace, and the company of loved ones.", top: 260, fontSize: 15, fontFamily: "Georgia", fill: "#4b5563", textAlign: "center" },
+    ],
+  },
+  {
+    id: "baby-soft",
+    name: "Baby Soft",
+    description: "Sweet, gentle new baby card",
+    accent: "#f472b6",
+    decor: "none",
+    items: [
+      { text: "👶 Welcome, Little One 👶", top: 70, fontSize: 28, fontFamily: "Palatino", fill: "#be185d", fontStyle: "italic", textAlign: "center" },
+      { text: "congratulations to", top: 140, fontSize: 14, fontFamily: "Palatino", fill: "#9ca3af", textAlign: "center" },
+      { text: "The Family", top: 175, fontSize: 30, fontFamily: "Brush Script MT", fill: "#1f2937", textAlign: "center" },
+      { text: "Wishing you endless cuddles, sleep-filled nights,\nand the sweetest of memories.", top: 250, fontSize: 14, fontFamily: "Palatino", fill: "#4b5563", fontStyle: "italic", textAlign: "center" },
+    ],
+  },
+];
+
 export const CardCanvas = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [canvas, setCanvas] = useState<FabricCanvas | null>(null);
@@ -82,11 +186,59 @@ export const CardCanvas = () => {
   // UI state
   const [projectTitle, setProjectTitle] = useState("Untitled Card");
   const [activeTool, setActiveTool] = useState<
-    "text" | "shapes" | "bg" | "ai" | "upload" | "stickers"
+    "text" | "presets" | "shapes" | "bg" | "ai" | "upload" | "stickers"
   >("text");
   const [zoom, setZoom] = useState(1);
   const [showGrid, setShowGrid] = useState(false);
   const [showLayers, setShowLayers] = useState(true);
+
+  // Custom (user-saved) text presets — stored in localStorage per user
+  type SavedTextItem = {
+    text: string;
+    left: number;
+    top: number;
+    width: number;
+    fontSize: number;
+    fontFamily: string;
+    fill: string;
+    fontWeight: string | number;
+    fontStyle: string;
+    textAlign: "left" | "center" | "right";
+    originX: "left" | "center" | "right";
+    charSpacing: number;
+    underline?: boolean;
+    angle?: number;
+    opacity?: number;
+    lineHeight?: number;
+  };
+  type SavedPreset = {
+    id: string;
+    name: string;
+    createdAt: number;
+    items: SavedTextItem[];
+  };
+  const [savedPresets, setSavedPresets] = useState<SavedPreset[]>([]);
+  const userKey = user?.id || "anon";
+  const presetStorageKey = `impressio:card-text-presets:${userKey}`;
+  const [newPresetName, setNewPresetName] = useState("");
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(presetStorageKey);
+      setSavedPresets(raw ? JSON.parse(raw) : []);
+    } catch {
+      setSavedPresets([]);
+    }
+  }, [presetStorageKey]);
+
+  const persistPresets = (next: SavedPreset[]) => {
+    setSavedPresets(next);
+    try {
+      localStorage.setItem(presetStorageKey, JSON.stringify(next));
+    } catch {
+      toast.error("Couldn't save preset (storage full)");
+    }
+  };
 
   // autosave
   const designIdRef = useRef<string | null>(searchParams.get("designId"));
@@ -529,6 +681,140 @@ export const CardCanvas = () => {
     fill: "#374151", textAlign: "center", originX: "center",
   }));
 
+  // ---- Built-in card text presets ----
+  const applyTextPreset = (preset: CardPreset) => {
+    if (!canvas) return;
+    const toRemove = canvas.getObjects().filter((o: any) => {
+      if (o.type === "textbox" || o.type === "i-text") return true;
+      if (o._presetDecor) return true;
+      return false;
+    });
+    toRemove.forEach((o) => canvas.remove(o));
+
+    if (preset.decor === "underline") {
+      const line = new Line([200, 130, 400, 130], { stroke: preset.accent, strokeWidth: 2, selectable: false });
+      (line as any)._presetDecor = true;
+      canvas.add(line);
+    } else if (preset.decor === "double-line") {
+      const l1 = new Line([180, 130, 420, 130], { stroke: preset.accent, strokeWidth: 2, selectable: false });
+      const l2 = new Line([210, 137, 390, 137], { stroke: preset.accent, strokeWidth: 1, selectable: false });
+      (l1 as any)._presetDecor = true;
+      (l2 as any)._presetDecor = true;
+      canvas.add(l1);
+      canvas.add(l2);
+    }
+
+    preset.items.forEach((it) => {
+      const tb = new Textbox(it.text, {
+        left: 300,
+        top: it.top,
+        width: it.width ?? 540,
+        fontSize: it.fontSize,
+        fontFamily: it.fontFamily,
+        fill: it.fill,
+        fontWeight: it.fontWeight ?? "normal",
+        fontStyle: it.fontStyle ?? "normal",
+        textAlign: it.textAlign ?? "center",
+        originX: "center",
+        charSpacing: it.charSpacing ?? 0,
+      });
+      canvas.add(tb);
+    });
+
+    canvas.discardActiveObject();
+    canvas.renderAll();
+    saveHistory(canvas);
+    toast.success(`Applied "${preset.name}" preset`);
+  };
+
+  // ---- Custom user presets ----
+  const saveCurrentAsPreset = (name: string) => {
+    if (!canvas) return;
+    const trimmed = name.trim();
+    if (!trimmed) { toast.error("Name your preset first"); return; }
+    const texts = canvas.getObjects().filter(
+      (o) => o.type === "textbox" || o.type === "i-text"
+    );
+    if (!texts.length) {
+      toast.error("Add some text to the card first");
+      return;
+    }
+    const items: SavedTextItem[] = texts.map((o: any) => ({
+      text: o.text ?? "",
+      left: o.left ?? 0,
+      top: o.top ?? 0,
+      width: o.width ?? 400,
+      fontSize: o.fontSize ?? 24,
+      fontFamily: o.fontFamily ?? "Arial",
+      fill: typeof o.fill === "string" ? o.fill : "#000000",
+      fontWeight: o.fontWeight ?? "normal",
+      fontStyle: o.fontStyle ?? "normal",
+      textAlign: (o.textAlign as any) ?? "left",
+      originX: (o.originX as any) ?? "left",
+      charSpacing: o.charSpacing ?? 0,
+      underline: !!o.underline,
+      angle: o.angle ?? 0,
+      opacity: o.opacity ?? 1,
+      lineHeight: o.lineHeight ?? 1.16,
+    }));
+    const preset: SavedPreset = {
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      name: trimmed,
+      createdAt: Date.now(),
+      items,
+    };
+    persistPresets([preset, ...savedPresets]);
+    setNewPresetName("");
+    toast.success(`Saved "${trimmed}"`);
+  };
+
+  const applyCustomPreset = (preset: SavedPreset) => {
+    if (!canvas) return;
+    const toRemove = canvas.getObjects().filter((o: any) => {
+      if (o.type === "textbox" || o.type === "i-text") return true;
+      if (o._presetDecor) return true;
+      return false;
+    });
+    toRemove.forEach((o) => canvas.remove(o));
+
+    preset.items.forEach((it) => {
+      const tb = new Textbox(it.text, {
+        left: it.left,
+        top: it.top,
+        width: it.width,
+        fontSize: it.fontSize,
+        fontFamily: it.fontFamily,
+        fill: it.fill,
+        fontWeight: it.fontWeight,
+        fontStyle: it.fontStyle,
+        textAlign: it.textAlign,
+        originX: it.originX,
+        charSpacing: it.charSpacing,
+        underline: it.underline,
+        angle: it.angle,
+        opacity: it.opacity,
+        lineHeight: it.lineHeight,
+      });
+      canvas.add(tb);
+    });
+
+    canvas.discardActiveObject();
+    canvas.renderAll();
+    saveHistory(canvas);
+    toast.success(`Applied "${preset.name}"`);
+  };
+
+  const deleteCustomPreset = (id: string) => {
+    persistPresets(savedPresets.filter((p) => p.id !== id));
+    toast.success("Preset removed");
+  };
+
+  const renameCustomPreset = (id: string, name: string) => {
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    persistPresets(savedPresets.map((p) => (p.id === id ? { ...p, name: trimmed } : p)));
+  };
+
   const handleSave = async () => {
     if (!canvas) return;
     if (!user) {
@@ -588,6 +874,7 @@ export const CardCanvas = () => {
 
   const tools = [
     { id: "text" as const, icon: Type, label: "Text" },
+    { id: "presets" as const, icon: LayoutTemplate, label: "Presets" },
     { id: "shapes" as const, icon: Shapes, label: "Shapes" },
     { id: "stickers" as const, icon: SmileIcon, label: "Stickers" },
     { id: "bg" as const, icon: Palette, label: "Background" },
@@ -717,6 +1004,99 @@ export const CardCanvas = () => {
                   <button onClick={addLine} className="aspect-square rounded-lg border border-slate-200 hover:border-violet-400 hover:bg-violet-50 flex items-center justify-center transition">
                     <Minus className="w-6 h-6 text-slate-700" />
                   </button>
+                </div>
+              )}
+
+              {activeTool === "presets" && (
+                <div className="space-y-4">
+                  {/* My presets */}
+                  <div>
+                    <div className="flex items-center gap-1.5 mb-2">
+                      <Bookmark className="w-3.5 h-3.5 text-slate-500" />
+                      <Label className="text-xs text-slate-600">My presets</Label>
+                    </div>
+                    <div className="flex gap-1.5 mb-2">
+                      <Input
+                        value={newPresetName}
+                        onChange={(e) => setNewPresetName(e.target.value)}
+                        placeholder="Preset name"
+                        className="h-8 text-xs"
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") saveCurrentAsPreset(newPresetName);
+                        }}
+                      />
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-8 shrink-0"
+                        onClick={() => saveCurrentAsPreset(newPresetName)}
+                      >
+                        <Plus className="w-3.5 h-3.5 mr-1" /> Save
+                      </Button>
+                    </div>
+                    {savedPresets.length === 0 ? (
+                      <div className="text-[11px] text-slate-500 px-1 py-2">
+                        Save your current text layout to reuse it later.
+                      </div>
+                    ) : (
+                      <ul className="space-y-1.5">
+                        {savedPresets.map((p) => (
+                          <li
+                            key={p.id}
+                            className="group flex items-center gap-1 rounded-md border border-slate-200 hover:border-violet-300 px-2 py-1.5"
+                          >
+                            <button
+                              onClick={() => applyCustomPreset(p)}
+                              className="flex-1 text-left min-w-0"
+                            >
+                              <div className="text-xs font-medium text-slate-800 truncate">{p.name}</div>
+                              <div className="text-[10px] text-slate-500">{p.items.length} element{p.items.length === 1 ? "" : "s"}</div>
+                            </button>
+                            <button
+                              onClick={() => {
+                                const next = prompt("Rename preset", p.name);
+                                if (next) renameCustomPreset(p.id, next);
+                              }}
+                              className="opacity-0 group-hover:opacity-100 text-[10px] text-slate-500 hover:text-violet-700 px-1"
+                            >
+                              Rename
+                            </button>
+                            <button
+                              onClick={() => deleteCustomPreset(p.id)}
+                              className="opacity-0 group-hover:opacity-100 text-rose-500 hover:text-rose-600 p-1"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+
+                  <Separator />
+
+                  {/* Built-in presets */}
+                  <div>
+                    <Label className="text-xs text-slate-600 mb-2 block">Layouts</Label>
+                    <div className="space-y-2">
+                      {CARD_PRESETS.map((p) => (
+                        <button
+                          key={p.id}
+                          onClick={() => applyTextPreset(p)}
+                          className="w-full text-left rounded-md border border-slate-200 hover:border-violet-400 hover:bg-violet-50 transition px-3 py-2.5"
+                        >
+                          <div className="flex items-center gap-2">
+                            <span
+                              className="w-2.5 h-2.5 rounded-full shrink-0"
+                              style={{ background: p.accent }}
+                            />
+                            <span className="text-sm font-medium text-slate-800">{p.name}</span>
+                          </div>
+                          <div className="text-[11px] text-slate-500 mt-0.5 pl-4.5">{p.description}</div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               )}
 
