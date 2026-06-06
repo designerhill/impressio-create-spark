@@ -216,6 +216,7 @@ export const CardCanvas = () => {
     name: string;
     createdAt: number;
     items: SavedTextItem[];
+    thumbnail?: string;
   };
   const [savedPresets, setSavedPresets] = useState<SavedPreset[]>([]);
   const userKey = user?.id || "anon";
