@@ -891,6 +891,9 @@ export const CertificateCanvas = () => {
               <TooltipContent>Redo (⌘⇧Z)</TooltipContent>
             </Tooltip>
             <Separator orientation="vertical" className="h-6" />
+            <Button size="sm" variant="ghost" onClick={() => setTemplatePickerOpen(true)}>
+              <LayoutTemplate className="w-4 h-4 mr-1.5" /> Templates
+            </Button>
             <Button size="sm" variant="ghost" onClick={handleShare}>
               <Share2 className="w-4 h-4 mr-1.5" /> Share
             </Button>
