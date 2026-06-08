@@ -1391,6 +1391,11 @@ export const CertificateCanvas = () => {
           )}
         </div>
       </div>
+      <TemplatePickerDialog
+        open={templatePickerOpen}
+        onOpenChange={setTemplatePickerOpen}
+        type="certificate"
+      />
     </TooltipProvider>
   );
 };
