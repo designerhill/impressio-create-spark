@@ -52,12 +52,12 @@ export const Navigation = () => {
     .toUpperCase();
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-lg border-b border-border">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border">
       <div className="max-w-7xl mx-auto px-6">
         <div className="flex items-center justify-between h-16">
           <Link to="/" className="flex items-center gap-2">
             <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-white" />
+              <Sparkles className="w-5 h-5 text-primary-foreground" />
             </div>
             <span className="text-xl font-black text-foreground">Impressio</span>
           </Link>
@@ -78,7 +78,7 @@ export const Navigation = () => {
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="flex items-center gap-2 rounded-full pl-1 pr-3 py-1 hover:bg-primary-soft transition-colors">
+                  <button className="flex items-center gap-2 rounded-full pl-1 pr-3 py-1 hover:bg-accent transition-colors">
                     <Avatar className="w-8 h-8">
                       <AvatarImage src={profile?.avatar_url ?? undefined} alt={displayName} />
                       <AvatarFallback className="bg-gradient-primary text-primary-foreground text-xs font-bold">
@@ -154,7 +154,7 @@ export const Navigation = () => {
         </div>
 
         {isMenuOpen && (
-          <div className="md:hidden py-4 border-t border-border bg-white/95 backdrop-blur-lg">
+          <div className="md:hidden py-4 border-t border-border bg-background/95 backdrop-blur-lg">
             <div className="space-y-4">
               {navigationItems.map((item) => (
                 <Link
