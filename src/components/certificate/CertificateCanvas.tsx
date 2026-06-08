@@ -187,6 +187,7 @@ export const CertificateCanvas = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [templatePickerOpen, setTemplatePickerOpen] = useState(false);
   const [searchParams] = useSearchParams();
   const templateId = searchParams.get("templateId");
   const fileInputRef = useRef<HTMLInputElement>(null);
