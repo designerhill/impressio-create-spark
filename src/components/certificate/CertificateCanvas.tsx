@@ -32,6 +32,7 @@ import { supabase } from "@/integrations/supabase/client";
 import jsPDF from "jspdf";
 import { renderTemplateObjects } from "@/lib/templateRender";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { TemplatePickerDialog } from "@/components/templates/TemplatePickerDialog";
 
 const FONTS = [
   "Arial", "Georgia", "Times New Roman", "Courier New", "Verdana",
