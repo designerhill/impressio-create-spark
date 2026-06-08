@@ -32,6 +32,7 @@ import { supabase } from "@/integrations/supabase/client";
 import jsPDF from "jspdf";
 import { renderTemplateObjects } from "@/lib/templateRender";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { TemplatePickerDialog } from "@/components/templates/TemplatePickerDialog";
 
 const FONTS = [
   "Arial", "Georgia", "Times New Roman", "Courier New", "Verdana",
@@ -186,6 +187,7 @@ export const CertificateCanvas = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [templatePickerOpen, setTemplatePickerOpen] = useState(false);
   const [searchParams] = useSearchParams();
   const templateId = searchParams.get("templateId");
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -889,6 +891,9 @@ export const CertificateCanvas = () => {
               <TooltipContent>Redo (⌘⇧Z)</TooltipContent>
             </Tooltip>
             <Separator orientation="vertical" className="h-6" />
+            <Button size="sm" variant="ghost" onClick={() => setTemplatePickerOpen(true)}>
+              <LayoutTemplate className="w-4 h-4 mr-1.5" /> Templates
+            </Button>
             <Button size="sm" variant="ghost" onClick={handleShare}>
               <Share2 className="w-4 h-4 mr-1.5" /> Share
             </Button>
@@ -1386,6 +1391,11 @@ export const CertificateCanvas = () => {
           )}
         </div>
       </div>
+      <TemplatePickerDialog
+        open={templatePickerOpen}
+        onOpenChange={setTemplatePickerOpen}
+        type="certificate"
+      />
     </TooltipProvider>
   );
 };
