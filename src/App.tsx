@@ -15,16 +15,30 @@ const lazyWithReload = <T extends { default: React.ComponentType<any> }>(
   factory: () => Promise<T>
 ) =>
   lazy(() =>
-    factory().catch((err) => {
-      const key = "lovable:chunk-reloaded";
-      if (!sessionStorage.getItem(key)) {
-        sessionStorage.setItem(key, "1");
-        window.location.reload();
-        // Return a never-resolving promise while the page reloads.
-        return new Promise<T>(() => {});
-      }
-      throw err;
-    })
+    factory()
+      .then((mod) => {
+        // Successful load — clear any prior reload flag so future stale
+        // chunks can also trigger a one-time reload.
+        sessionStorage.removeItem("lovable:chunk-reloaded");
+        return mod;
+      })
+      .catch((err) => {
+        const msg = String(err?.message || err);
+        const isChunkError =
+          /dynamically imported module|Failed to fetch dynamically imported module|Importing a module script failed|ChunkLoadError/i.test(
+            msg
+          );
+        const key = "lovable:chunk-reloaded";
+        const lastReload = Number(sessionStorage.getItem(key) || 0);
+        const now = Date.now();
+        // Allow another reload if it's been more than 10s since the last one.
+        if (isChunkError && now - lastReload > 10_000) {
+          sessionStorage.setItem(key, String(now));
+          window.location.reload();
+          return new Promise<T>(() => {});
+        }
+        throw err;
+      })
   );
 
 const Index = lazyWithReload(() => import("./pages/Index"));
