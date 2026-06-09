@@ -6,23 +6,44 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { lazy, Suspense } from "react";
 import { Loader2 } from "lucide-react";
 
-const Index = lazy(() => import("./pages/Index"));
-const Auth = lazy(() => import("./pages/Auth"));
-const CertificateCreator = lazy(() => import("./pages/CertificateCreator"));
-const CardDesigner = lazy(() => import("./pages/CardDesigner"));
-const ImageOptimizer = lazy(() => import("./pages/ImageOptimizer"));
-const Templates = lazy(() => import("./pages/Templates"));
-const MyDesigns = lazy(() => import("./pages/MyDesigns"));
-const Account = lazy(() => import("./pages/Account"));
-const Pricing = lazy(() => import("./pages/Pricing"));
-const Features = lazy(() => import("./pages/Features"));
-const About = lazy(() => import("./pages/About"));
-const Contact = lazy(() => import("./pages/Contact"));
-const Privacy = lazy(() => import("./pages/Privacy"));
-const Terms = lazy(() => import("./pages/Terms"));
-const Security = lazy(() => import("./pages/Security"));
-const Cookies = lazy(() => import("./pages/Cookies"));
-const NotFound = lazy(() => import("./pages/NotFound"));
+/**
+ * Wrap dynamic imports so a stale chunk (after a redeploy) triggers a one-time
+ * full reload instead of a blank screen. The flag in sessionStorage prevents
+ * infinite reload loops if the failure is genuine.
+ */
+const lazyWithReload = <T extends { default: React.ComponentType<any> }>(
+  factory: () => Promise<T>
+) =>
+  lazy(() =>
+    factory().catch((err) => {
+      const key = "lovable:chunk-reloaded";
+      if (!sessionStorage.getItem(key)) {
+        sessionStorage.setItem(key, "1");
+        window.location.reload();
+        // Return a never-resolving promise while the page reloads.
+        return new Promise<T>(() => {});
+      }
+      throw err;
+    })
+  );
+
+const Index = lazyWithReload(() => import("./pages/Index"));
+const Auth = lazyWithReload(() => import("./pages/Auth"));
+const CertificateCreator = lazyWithReload(() => import("./pages/CertificateCreator"));
+const CardDesigner = lazyWithReload(() => import("./pages/CardDesigner"));
+const ImageOptimizer = lazyWithReload(() => import("./pages/ImageOptimizer"));
+const Templates = lazyWithReload(() => import("./pages/Templates"));
+const MyDesigns = lazyWithReload(() => import("./pages/MyDesigns"));
+const Account = lazyWithReload(() => import("./pages/Account"));
+const Pricing = lazyWithReload(() => import("./pages/Pricing"));
+const Features = lazyWithReload(() => import("./pages/Features"));
+const About = lazyWithReload(() => import("./pages/About"));
+const Contact = lazyWithReload(() => import("./pages/Contact"));
+const Privacy = lazyWithReload(() => import("./pages/Privacy"));
+const Terms = lazyWithReload(() => import("./pages/Terms"));
+const Security = lazyWithReload(() => import("./pages/Security"));
+const Cookies = lazyWithReload(() => import("./pages/Cookies"));
+const NotFound = lazyWithReload(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
 
