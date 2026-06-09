@@ -269,7 +269,7 @@ export const CertificateCanvas = () => {
 
   const saveHistory = useCallback((c: FabricCanvas) => {
     if (isRestoring.current) return;
-    const json = JSON.stringify(c.toJSON(["customName"]));
+    const json = JSON.stringify((c as any).toJSON(["customName"]));
     historyRef.current = historyRef.current.slice(0, historyIndex.current + 1);
     historyRef.current.push(json);
     if (historyRef.current.length > 50) historyRef.current.shift();
@@ -788,7 +788,7 @@ export const CertificateCanvas = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { toast.error("Please sign in to save"); return; }
       const dataUrl = canvas.toDataURL({ format: "png", multiplier: 1 });
-      const designData = canvas.toJSON(["customName"]);
+      const designData = (canvas as any).toJSON(["customName"]);
       const finalTitle =
         projectTitle && projectTitle.trim() && projectTitle !== "Untitled Certificate"
           ? projectTitle
