@@ -359,6 +359,11 @@ export const CardCanvas = () => {
       backgroundColor: "#fef3c7",
     });
 
+    // Re-sync designId from URL on every (re)mount so switching templates
+    // (which only updates ?templateId=) doesn't reload the previously
+    // autosaved design and skip the new template.
+    designIdRef.current = searchParams.get("designId");
+
     const loadExistingDesign = async () => {
       const id = designIdRef.current;
       if (!id) return false;
