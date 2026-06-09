@@ -25,7 +25,7 @@ import {
   Layers, ChevronUp, ChevronDown, Lock, Unlock, Palette, FlipHorizontal,
   FlipVertical, Share2, ZoomIn, ZoomOut, Grid3x3, Upload as UploadIcon,
   Smile as SmileIcon, Shapes, PanelLeftClose, FileText, LayoutTemplate,
-  Bookmark, Plus,
+  Bookmark, Plus, GripVertical,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -482,6 +482,17 @@ export const CertificateCanvas = () => {
   };
   const bringForward = () => { if (canvas && activeObject) { canvas.bringObjectForward(activeObject); canvas.renderAll(); saveHistory(canvas); } };
   const sendBackward = () => { if (canvas && activeObject) { canvas.sendObjectBackwards(activeObject); canvas.renderAll(); saveHistory(canvas); } };
+  const reorderLayer = (fromIdx: number, toIdx: number) => {
+    if (!canvas) return;
+    if (fromIdx === toIdx || fromIdx < 0 || toIdx < 0) return;
+    const objs = canvas.getObjects();
+    const obj = objs[fromIdx];
+    if (!obj) return;
+    (canvas as any).moveObjectTo(obj, toIdx);
+    canvas.renderAll();
+    saveHistory(canvas);
+    refresh();
+  };
   const flipH = () => updateActive({ flipX: !(activeObject as any)?.flipX });
   const flipV = () => updateActive({ flipY: !(activeObject as any)?.flipY });
   const toggleLock = () => {
@@ -1339,15 +1350,29 @@ export const CertificateCanvas = () => {
                       const realIdx = layers.length - 1 - idx;
                       const selected = activeObject === o;
                       return (
-                        <li key={realIdx}>
+                        <li
+                          key={realIdx}
+                          draggable
+                          onDragStart={(e) => {
+                            e.dataTransfer.setData("text/plain", String(realIdx));
+                            e.dataTransfer.effectAllowed = "move";
+                          }}
+                          onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = "move"; }}
+                          onDrop={(e) => {
+                            e.preventDefault();
+                            const from = Number(e.dataTransfer.getData("text/plain"));
+                            if (!Number.isNaN(from)) reorderLayer(from, realIdx);
+                          }}
+                        >
                           <button
                             onClick={() => selectLayer(o)}
-                            className={`w-full flex items-center gap-2 px-2 py-2 rounded-md text-left text-sm transition ${
+                            className={`w-full flex items-center gap-2 px-2 py-2 rounded-md text-left text-sm transition cursor-grab active:cursor-grabbing ${
                               selected
                                 ? "bg-violet-50 text-violet-900 ring-1 ring-violet-200"
                                 : "hover:bg-slate-100 text-slate-700"
                             }`}
                           >
+                            <GripVertical className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                             <span className="w-6 h-6 rounded bg-slate-100 grid place-items-center text-slate-500 shrink-0">
                               {o.type === "textbox" || o.type === "i-text" ? (
                                 <Type className="w-3.5 h-3.5" />
