@@ -25,7 +25,7 @@ import {
   Layers, ChevronUp, ChevronDown, Lock, Unlock, Palette, FlipHorizontal,
   FlipVertical, Share2, ZoomIn, ZoomOut, Grid3x3, Upload as UploadIcon,
   Smile as SmileIcon, Shapes, PanelLeftClose, FileText, LayoutTemplate,
-  Bookmark, Plus,
+  Bookmark, Plus, GripVertical,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -482,6 +482,17 @@ export const CertificateCanvas = () => {
   };
   const bringForward = () => { if (canvas && activeObject) { canvas.bringObjectForward(activeObject); canvas.renderAll(); saveHistory(canvas); } };
   const sendBackward = () => { if (canvas && activeObject) { canvas.sendObjectBackwards(activeObject); canvas.renderAll(); saveHistory(canvas); } };
+  const reorderLayer = (fromIdx: number, toIdx: number) => {
+    if (!canvas) return;
+    if (fromIdx === toIdx || fromIdx < 0 || toIdx < 0) return;
+    const objs = canvas.getObjects();
+    const obj = objs[fromIdx];
+    if (!obj) return;
+    (canvas as any).moveObjectTo(obj, toIdx);
+    canvas.renderAll();
+    saveHistory(canvas);
+    refresh();
+  };
   const flipH = () => updateActive({ flipX: !(activeObject as any)?.flipX });
   const flipV = () => updateActive({ flipY: !(activeObject as any)?.flipY });
   const toggleLock = () => {
