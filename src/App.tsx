@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
  * full reload instead of a blank screen. The flag in sessionStorage prevents
  * infinite reload loops if the failure is genuine.
  */
-const lazyWithReload = <T extends { default: React.ComponentType<any> }>(
+const lazyWithReload = <T extends { default: React.ComponentType }>(
   factory: () => Promise<T>
 ) =>
   lazy(() =>
