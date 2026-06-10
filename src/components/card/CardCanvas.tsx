@@ -29,7 +29,7 @@ import {
   FlipVertical, Cloud, CloudOff, Loader2, CheckCircle2,
   Share2, ZoomIn, ZoomOut, Grid3x3, Upload as UploadIcon, Smile as SmileIcon,
   Shapes, PanelLeftClose, LayoutTemplate, Bookmark, Plus, GripVertical,
-  Pencil,
+  Pencil, Eye, EyeOff,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";

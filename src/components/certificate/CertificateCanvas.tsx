@@ -26,7 +26,7 @@ import {
   FlipVertical, Share2, ZoomIn, ZoomOut, Grid3x3, Upload as UploadIcon,
   Smile as SmileIcon, Shapes, PanelLeftClose, FileText, LayoutTemplate,
   Bookmark, Plus, GripVertical,
-  Pencil,
+  Pencil, Eye, EyeOff,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
