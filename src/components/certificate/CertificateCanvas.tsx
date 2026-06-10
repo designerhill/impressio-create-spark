@@ -872,6 +872,16 @@ export const CertificateCanvas = () => {
     saveHistory(canvas);
     refresh();
   };
+  const toggleLayerVisibility = (idx: number) => {
+    if (!canvas) return;
+    const obj = canvas.getObjects()[idx];
+    if (!obj) return;
+    const current = (obj as any).visible !== false;
+    (obj as any).set("visible", !current);
+    canvas.renderAll();
+    saveHistory(canvas);
+    refresh();
+  };
 
   const tools = [
     { id: "text" as const, icon: Type, label: "Text" },
