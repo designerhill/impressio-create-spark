@@ -1415,6 +1415,20 @@ export const CardCanvas = () => {
                             }`}
                           >
                             <GripVertical className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                toggleLayerVisibility(realIdx);
+                              }}
+                              className="text-slate-400 hover:text-slate-600 p-0.5 shrink-0"
+                              title={(o as any).visible === false ? "Show layer" : "Hide layer"}
+                            >
+                              {(o as any).visible === false ? (
+                                <EyeOff className="w-3.5 h-3.5" />
+                              ) : (
+                                <Eye className="w-3.5 h-3.5" />
+                              )}
+                            </button>
                             <span className="w-6 h-6 rounded bg-slate-100 grid place-items-center text-slate-500 shrink-0">
                               {o.type === "textbox" || o.type === "i-text" ? (
                                 <Type className="w-3.5 h-3.5" />
@@ -1453,7 +1467,9 @@ export const CardCanvas = () => {
                               />
                             ) : (
                               <>
-                                <span className="truncate flex-1">{layerName(o, realIdx)}</span>
+                                <span className={`truncate flex-1 ${(o as any).visible === false ? "opacity-50" : ""}`}>
+                                  {layerName(o, realIdx)}
+                                </span>
                                 <button
                                   onClick={(e) => {
                                     e.stopPropagation();
