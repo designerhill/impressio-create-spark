@@ -882,6 +882,22 @@ export const CertificateCanvas = () => {
     saveHistory(canvas);
     refresh();
   };
+  const toggleLayerLock = (idx: number) => {
+    if (!canvas) return;
+    const obj = canvas.getObjects()[idx];
+    if (!obj) return;
+    const locked = (obj as any).lockMovementX === true;
+    (obj as any).set({
+      lockMovementX: !locked,
+      lockMovementY: !locked,
+      lockScalingX: !locked,
+      lockScalingY: !locked,
+      lockRotation: !locked,
+    });
+    canvas.renderAll();
+    saveHistory(canvas);
+    refresh();
+  };
 
   const tools = [
     { id: "text" as const, icon: Type, label: "Text" },
