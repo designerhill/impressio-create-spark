@@ -29,7 +29,7 @@ import {
   FlipVertical, Cloud, CloudOff, Loader2, CheckCircle2,
   Share2, ZoomIn, ZoomOut, Grid3x3, Upload as UploadIcon, Smile as SmileIcon,
   Shapes, PanelLeftClose, LayoutTemplate, Bookmark, Plus, GripVertical,
-  Pencil,
+  Pencil, Eye, EyeOff,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -911,6 +911,16 @@ export const CardCanvas = () => {
     saveHistory(canvas);
     refresh();
   };
+  const toggleLayerVisibility = (idx: number) => {
+    if (!canvas) return;
+    const obj = canvas.getObjects()[idx];
+    if (!obj) return;
+    const current = (obj as any).visible !== false;
+    (obj as any).set("visible", !current);
+    canvas.renderAll();
+    saveHistory(canvas);
+    refresh();
+  };
 
   const handleShare = async () => {
     try {
@@ -1405,6 +1415,20 @@ export const CardCanvas = () => {
                             }`}
                           >
                             <GripVertical className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                toggleLayerVisibility(realIdx);
+                              }}
+                              className="text-slate-400 hover:text-slate-600 p-0.5 shrink-0"
+                              title={(o as any).visible === false ? "Show layer" : "Hide layer"}
+                            >
+                              {(o as any).visible === false ? (
+                                <EyeOff className="w-3.5 h-3.5" />
+                              ) : (
+                                <Eye className="w-3.5 h-3.5" />
+                              )}
+                            </button>
                             <span className="w-6 h-6 rounded bg-slate-100 grid place-items-center text-slate-500 shrink-0">
                               {o.type === "textbox" || o.type === "i-text" ? (
                                 <Type className="w-3.5 h-3.5" />
@@ -1443,7 +1467,9 @@ export const CardCanvas = () => {
                               />
                             ) : (
                               <>
-                                <span className="truncate flex-1">{layerName(o, realIdx)}</span>
+                                <span className={`truncate flex-1 ${(o as any).visible === false ? "opacity-50" : ""}`}>
+                                  {layerName(o, realIdx)}
+                                </span>
                                 <button
                                   onClick={(e) => {
                                     e.stopPropagation();
