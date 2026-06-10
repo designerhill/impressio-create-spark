@@ -921,6 +921,22 @@ export const CardCanvas = () => {
     saveHistory(canvas);
     refresh();
   };
+  const toggleLayerLock = (idx: number) => {
+    if (!canvas) return;
+    const obj = canvas.getObjects()[idx];
+    if (!obj) return;
+    const locked = (obj as any).lockMovementX === true;
+    (obj as any).set({
+      lockMovementX: !locked,
+      lockMovementY: !locked,
+      lockScalingX: !locked,
+      lockScalingY: !locked,
+      lockRotation: !locked,
+    });
+    canvas.renderAll();
+    saveHistory(canvas);
+    refresh();
+  };
 
   const handleShare = async () => {
     try {
@@ -1429,6 +1445,20 @@ export const CardCanvas = () => {
                                 <Eye className="w-3.5 h-3.5" />
                               )}
                             </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                toggleLayerLock(realIdx);
+                              }}
+                              className="text-slate-400 hover:text-slate-600 p-0.5 shrink-0"
+                              title={(o as any).lockMovementX ? "Unlock layer" : "Lock layer"}
+                            >
+                              {(o as any).lockMovementX ? (
+                                <Lock className="w-3.5 h-3.5" />
+                              ) : (
+                                <Unlock className="w-3.5 h-3.5" />
+                              )}
+                            </button>
                             <span className="w-6 h-6 rounded bg-slate-100 grid place-items-center text-slate-500 shrink-0">
                               {o.type === "textbox" || o.type === "i-text" ? (
                                 <Type className="w-3.5 h-3.5" />
@@ -1480,9 +1510,8 @@ export const CardCanvas = () => {
                                 >
                                   <Pencil className="w-3 h-3" />
                                 </button>
-                              </>
+                            </>
                             )}
-                            {(o as any).lockMovementX && <Lock className="w-3 h-3 text-slate-400 shrink-0" />}
                           </div>
                         </li>
                       );
