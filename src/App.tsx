@@ -34,6 +34,10 @@ const CardDesigner = lazyWithReload(() => import("./pages/CardDesigner"));
 const ImageOptimizer = lazyWithReload(() => import("./pages/ImageOptimizer"));
 const Templates = lazyWithReload(() => import("./pages/Templates"));
 const MyDesigns = lazyWithReload(() => import("./pages/MyDesigns"));
+const Marketplace = lazyWithReload(() => import("./pages/Marketplace"));
+const MarketplaceListing = lazyWithReload(() => import("./pages/MarketplaceListing"));
+const SellerDashboard = lazyWithReload(() => import("./pages/SellerDashboard"));
+const WalletPage = lazyWithReload(() => import("./pages/Wallet"));
 const Account = lazyWithReload(() => import("./pages/Account"));
 const Pricing = lazyWithReload(() => import("./pages/Pricing"));
 const Features = lazyWithReload(() => import("./pages/Features"));
@@ -105,6 +109,10 @@ const App = () => (
             <Route path="/image-optimizer" element={<ImageOptimizer />} />
             <Route path="/templates" element={<Templates />} />
             <Route path="/my-designs" element={<MyDesigns />} />
+            <Route path="/marketplace" element={<Marketplace />} />
+            <Route path="/marketplace/sell" element={<SellerDashboard />} />
+            <Route path="/marketplace/:id" element={<MarketplaceListing />} />
+            <Route path="/wallet" element={<WalletPage />} />
             <Route path="/account" element={<Account />} />
             <Route path="/pricing" element={<Pricing />} />
             <Route path="/features" element={<Features />} />

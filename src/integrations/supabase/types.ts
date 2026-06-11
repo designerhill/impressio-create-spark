@@ -47,6 +47,92 @@ export type Database = {
         }
         Relationships: []
       }
+      marketplace_listings: {
+        Row: {
+          created_at: string
+          description: string | null
+          design_id: string
+          id: string
+          is_published: boolean
+          preview_url: string | null
+          price_cents: number
+          sales_count: number
+          seller_id: string
+          title: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          design_id: string
+          id?: string
+          is_published?: boolean
+          preview_url?: string | null
+          price_cents?: number
+          sales_count?: number
+          seller_id: string
+          title: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          design_id?: string
+          id?: string
+          is_published?: boolean
+          preview_url?: string | null
+          price_cents?: number
+          sales_count?: number
+          seller_id?: string
+          title?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketplace_listings_design_id_fkey"
+            columns: ["design_id"]
+            isOneToOne: false
+            referencedRelation: "designs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payout_requests: {
+        Row: {
+          amount_cents: number
+          created_at: string
+          id: string
+          notes: string | null
+          payout_method: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount_cents: number
+          created_at?: string
+          id?: string
+          notes?: string | null
+          payout_method?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount_cents?: number
+          created_at?: string
+          id?: string
+          notes?: string | null
+          payout_method?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -85,6 +171,63 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      purchases: {
+        Row: {
+          buyer_id: string
+          cloned_design_id: string | null
+          created_at: string
+          id: string
+          listing_id: string
+          price_cents: number
+          seller_earning_cents: number
+          seller_id: string
+          status: string
+          stripe_session_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          buyer_id: string
+          cloned_design_id?: string | null
+          created_at?: string
+          id?: string
+          listing_id: string
+          price_cents: number
+          seller_earning_cents?: number
+          seller_id: string
+          status?: string
+          stripe_session_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          buyer_id?: string
+          cloned_design_id?: string | null
+          created_at?: string
+          id?: string
+          listing_id?: string
+          price_cents?: number
+          seller_earning_cents?: number
+          seller_id?: string
+          status?: string
+          stripe_session_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchases_cloned_design_id_fkey"
+            columns: ["cloned_design_id"]
+            isOneToOne: false
+            referencedRelation: "designs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchases_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_listings"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       subscriptions: {
         Row: {
@@ -155,6 +298,71 @@ export type Database = {
           template_data?: Json
           title?: string
           type?: string
+        }
+        Relationships: []
+      }
+      wallet_transactions: {
+        Row: {
+          amount_cents: number
+          created_at: string
+          id: string
+          note: string | null
+          purchase_id: string | null
+          type: string
+          user_id: string
+        }
+        Insert: {
+          amount_cents: number
+          created_at?: string
+          id?: string
+          note?: string | null
+          purchase_id?: string | null
+          type: string
+          user_id: string
+        }
+        Update: {
+          amount_cents?: number
+          created_at?: string
+          id?: string
+          note?: string | null
+          purchase_id?: string | null
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wallet_transactions_purchase_id_fkey"
+            columns: ["purchase_id"]
+            isOneToOne: false
+            referencedRelation: "purchases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wallets: {
+        Row: {
+          balance_cents: number
+          created_at: string
+          id: string
+          lifetime_earnings_cents: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          balance_cents?: number
+          created_at?: string
+          id?: string
+          lifetime_earnings_cents?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          balance_cents?: number
+          created_at?: string
+          id?: string
+          lifetime_earnings_cents?: number
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }

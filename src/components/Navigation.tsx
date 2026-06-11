@@ -11,6 +11,8 @@ import {
   Bell,
   Moon,
   Sun,
+  Store,
+  Wallet as WalletIcon,
 } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
@@ -37,6 +39,7 @@ export const Navigation = () => {
   const navigationItems = [
     { name: "Features", href: "/features" },
     { name: "Templates", href: "/templates" },
+    { name: "Marketplace", href: "/marketplace" },
     { name: "Pricing", href: "/pricing" },
     { name: "About", href: "/about" },
   ];
@@ -101,6 +104,12 @@ export const Navigation = () => {
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate("/my-designs")}>
                     <LayoutGrid className="w-4 h-4 mr-2" /> My Designs
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate("/marketplace/sell")}>
+                    <Store className="w-4 h-4 mr-2" /> Sell designs
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate("/wallet")}>
+                    <WalletIcon className="w-4 h-4 mr-2" /> Wallet
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate("/account?tab=account")}>
                     <Settings className="w-4 h-4 mr-2" /> Account settings
