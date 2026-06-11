@@ -6,40 +6,25 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Component, lazy, Suspense, type ErrorInfo, type ReactNode } from "react";
 import { Loader2, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { isChunkLoadError, reloadForFreshChunks } from "@/lib/chunkReload";
 
 /**
  * Wrap dynamic imports so a stale chunk (after a redeploy) triggers a one-time
- * full reload instead of a blank screen. The flag in sessionStorage prevents
- * infinite reload loops if the failure is genuine.
+ * full reload instead of a blank screen. While reloading we resolve to a stub
+ * module — never a forever-pending promise, which corrupts React.lazy's
+ * internal state ("_result is undefined").
  */
 const lazyWithReload = <T extends { default: React.ComponentType }>(
   factory: () => Promise<T>
 ) =>
   lazy(() =>
-    factory()
-      .then((mod) => {
-        // Successful load — clear any prior reload flag so future stale
-        // chunks can also trigger a one-time reload.
-        sessionStorage.removeItem("lovable:chunk-reloaded");
-        return mod;
-      })
-      .catch((err) => {
-        const msg = String(err?.message || err);
-        const isChunkError =
-          /dynamically imported module|Failed to fetch dynamically imported module|Importing a module script failed|ChunkLoadError/i.test(
-            msg
-          );
-        const key = "lovable:chunk-reloaded";
-        const lastReload = Number(sessionStorage.getItem(key) || 0);
-        const now = Date.now();
-        // Allow another reload if it's been more than 10s since the last one.
-        if (isChunkError && now - lastReload > 10_000) {
-          sessionStorage.setItem(key, String(now));
-          window.location.reload();
-          return new Promise<T>(() => {});
-        }
-        throw err;
-      })
+    factory().catch((err) => {
+      if (isChunkLoadError(err) && reloadForFreshChunks()) {
+        // Page is reloading — render nothing in the meantime.
+        return { default: () => null } as unknown as T;
+      }
+      throw err;
+    })
   );
 
 const Index = lazyWithReload(() => import("./pages/Index"));
@@ -61,11 +46,6 @@ const Cookies = lazyWithReload(() => import("./pages/Cookies"));
 const NotFound = lazyWithReload(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
-
-const isChunkLoadError = (error: unknown) =>
-  /dynamically imported module|Failed to fetch dynamically imported module|Importing a module script failed|ChunkLoadError/i.test(
-    String((error as Error)?.message || error)
-  );
 
 class ChunkErrorBoundary extends Component<
   { children: ReactNode },
