@@ -18,13 +18,24 @@ const lazyWithReload = <T extends { default: React.ComponentType }>(
   factory: () => Promise<T>
 ) =>
   lazy(() =>
-    factory().catch((err) => {
-      if (isChunkLoadError(err) && reloadForFreshChunks()) {
-        // Page is reloading — render nothing in the meantime.
-        return { default: () => null } as unknown as T;
-      }
-      throw err;
-    })
+    factory()
+      .then((mod) => {
+        // Vite's preload helper can RESOLVE with `undefined` when a
+        // vite:preloadError listener prevented the error — normalize that
+        // into a chunk-load error so it's handled below instead of
+        // corrupting React.lazy ("_result is undefined").
+        if (!mod || !(mod as Partial<T>).default) {
+          throw new Error("ChunkLoadError: dynamically imported module resolved empty");
+        }
+        return mod;
+      })
+      .catch((err) => {
+        if (isChunkLoadError(err) && reloadForFreshChunks()) {
+          // Page is reloading — render nothing in the meantime.
+          return { default: () => null } as unknown as T;
+        }
+        throw err;
+      })
   );
 
 const Index = lazyWithReload(() => import("./pages/Index"));
