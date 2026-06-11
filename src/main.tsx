@@ -12,8 +12,12 @@ import '@fontsource/dm-sans/600.css'
 import { reloadForFreshChunks } from './lib/chunkReload'
 
 window.addEventListener('vite:preloadError', (event) => {
-  event.preventDefault()
-  reloadForFreshChunks()
+  // Only swallow the error if we actually reload. Calling preventDefault()
+  // makes Vite's preload helper RESOLVE the import with `undefined`, which
+  // corrupts React.lazy ("_result is undefined") if no reload happens.
+  if (reloadForFreshChunks()) {
+    event.preventDefault()
+  }
 })
 
 initTheme();
