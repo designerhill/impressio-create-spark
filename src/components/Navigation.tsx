@@ -39,6 +39,7 @@ export const Navigation = () => {
   const navigationItems = [
     { name: "Features", href: "/features" },
     { name: "Templates", href: "/templates" },
+    { name: "Image Optimizer", href: "/image-optimizer" },
     { name: "Marketplace", href: "/marketplace" },
     { name: "Pricing", href: "/pricing" },
     { name: "About", href: "/about" },

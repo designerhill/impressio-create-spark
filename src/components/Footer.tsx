@@ -7,12 +7,14 @@ export const Footer = () => {
     Product: [
       { name: "Features", href: "/features" },
       { name: "Templates", href: "/templates" },
+      { name: "Certificate Creator", href: "/certificate-creator" },
+      { name: "Card Designer", href: "/card-designer" },
+      { name: "Image Optimizer", href: "/image-optimizer" },
+      { name: "Marketplace", href: "/marketplace" },
       { name: "Pricing", href: "/pricing" }
-
     ],
     Company: [
       { name: "About", href: "/about" },
-      { name: "Blog", href: "#blog" },
       { name: "Contact", href: "/contact" }
     ],
     Legal: [
